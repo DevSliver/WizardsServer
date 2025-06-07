@@ -21,6 +21,7 @@ namespace WizardsServer
             Database.Initialize(connectionString);
 
             AuthService authService = new AuthService();
+            UserSettings userSettings = new UserSettings();
 
             // Сервер не отключается сам.
             await Task.Delay(-1);

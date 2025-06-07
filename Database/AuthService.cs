@@ -10,8 +10,9 @@ namespace WizardsServer
     {
         public AuthService()
         {
-            CommandProcessor.Instance.Subscribe("register", HandleRegister);
-            CommandProcessor.Instance.Subscribe("login", HandleLogin);
+            var processor = CommandProcessor.Instance;
+            processor.Subscribe("register", HandleRegister);
+            processor.Subscribe("login", HandleLogin);
         }
 
         private void HandleRegister(string[] args, IConnectionContext context)
@@ -29,9 +30,7 @@ namespace WizardsServer
             {
                 using var checkCmd = Database.CreateCommand("SELECT COUNT(*) FROM users WHERE username = @u");
                 checkCmd.Parameters.AddWithValue("u", username);
-                long exists = Convert.ToInt64(checkCmd.ExecuteScalar());
-
-                if (exists > 0)
+                if (Convert.ToInt64(checkCmd.ExecuteScalar()) > 0)
                 {
                     context.SendAsync("register fail user_exists");
                     return;
@@ -39,16 +38,17 @@ namespace WizardsServer
 
                 string hash = BCrypt.Net.BCrypt.HashPassword(password);
 
-                using var cmd = Database.CreateCommand("INSERT INTO users (username, password_hash) VALUES (@u, @p)");
+                using var cmd = Database.CreateCommand("INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id");
                 cmd.Parameters.AddWithValue("u", username);
                 cmd.Parameters.AddWithValue("p", hash);
-                cmd.ExecuteNonQuery();
 
-                context.SendAsync("register success");
+                var userId = Convert.ToInt32(cmd.ExecuteScalar());
+                AuthenticateClient(context, userId);
+                context.SendAsync($"register success {userId}");
             }
             catch
             {
-                context.SendAsync($"register fail error");
+                context.SendAsync("register fail error");
             }
         }
 
@@ -75,20 +75,26 @@ namespace WizardsServer
                     return;
                 }
 
-                string hash = reader.GetString(1);
-                if (!BCrypt.Net.BCrypt.Verify(password, hash))
+                if (!BCrypt.Net.BCrypt.Verify(password, reader.GetString(1)))
                 {
                     context.SendAsync("login fail wrong_password");
                     return;
                 }
 
                 int userId = reader.GetInt32(0);
+                AuthenticateClient(context, userId);
                 context.SendAsync($"login success {userId}");
             }
             catch
             {
                 context.SendAsync("login fail error");
             }
+        }
+
+        private void AuthenticateClient(IConnectionContext context, int userId)
+        {
+            if (context is ConnectionContext ctx)
+                ctx.Client.Authenticate(userId);
         }
     }
 }

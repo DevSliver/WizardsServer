@@ -23,8 +23,15 @@ namespace WizardsServer
 
     public class Client : TcpSession
     {
+        public int? UserId { get; set; }
+        public bool IsAuthenticated => UserId.HasValue;
+
         public Client(TcpServer server) : base(server) { }
 
+        public void Authenticate(int userId)
+        {
+            UserId = userId;
+        }
         protected override void OnConnected()
         {
             Console.WriteLine($"Клиент с ID {Id} подключен.");
@@ -48,16 +55,17 @@ namespace WizardsServer
     }
     public class ConnectionContext : IConnectionContext
     {
-        private readonly Client _client;
+        public Client Client { get; }
 
         public ConnectionContext(Client client)
         {
-            _client = client;
+            Client = client;
         }
 
         public void SendAsync(string message)
         {
-            _client.SendAsync(message);
+            Client.SendAsync(message);
         }
     }
+
 }
