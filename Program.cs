@@ -20,6 +20,8 @@ namespace WizardsServer
                            $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};";
             Database.Initialize(connectionString);
 
+            AuthService authService = new AuthService();
+
             // Сервер не отключается сам.
             await Task.Delay(-1);
         }
