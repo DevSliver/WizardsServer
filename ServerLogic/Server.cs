@@ -47,6 +47,7 @@ namespace WizardsServer
         }
         public void SendMessageAsync(string message)
         {
+            Console.WriteLine($"Trying to send message: {message}");
             SendAsync(message + "\n");
         }
     }
