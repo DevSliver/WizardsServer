@@ -7,7 +7,7 @@ namespace WizardsServer
 {
     public interface IConnectionContext
     {
-        void SendMessageAsync(string message);
+        void SendAsync(string message);
     }
 
     public class CommandProcessor

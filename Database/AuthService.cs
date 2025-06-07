@@ -18,7 +18,7 @@ namespace WizardsServer
         {
             if (args.Length != 2)
             {
-                context.SendMessageAsync("register fail usage");
+                context.SendAsync("register fail usage");
                 return;
             }
 
@@ -33,7 +33,7 @@ namespace WizardsServer
 
                 if (exists > 0)
                 {
-                    context.SendMessageAsync("register fail user_exists");
+                    context.SendAsync("register fail user_exists");
                     return;
                 }
 
@@ -44,11 +44,11 @@ namespace WizardsServer
                 cmd.Parameters.AddWithValue("p", hash);
                 cmd.ExecuteNonQuery();
 
-                context.SendMessageAsync("register success");
+                context.SendAsync("register success");
             }
             catch
             {
-                context.SendMessageAsync($"register fail error");
+                context.SendAsync($"register fail error");
             }
         }
 
@@ -56,7 +56,7 @@ namespace WizardsServer
         {
             if (args.Length != 2)
             {
-                context.SendMessageAsync("login fail usage");
+                context.SendAsync("login fail usage");
                 return;
             }
 
@@ -71,23 +71,23 @@ namespace WizardsServer
                 using var reader = cmd.ExecuteReader();
                 if (!reader.Read())
                 {
-                    context.SendMessageAsync("login fail user_not_found");
+                    context.SendAsync("login fail user_not_found");
                     return;
                 }
 
                 string hash = reader.GetString(1);
                 if (!BCrypt.Net.BCrypt.Verify(password, hash))
                 {
-                    context.SendMessageAsync("login fail wrong_password");
+                    context.SendAsync("login fail wrong_password");
                     return;
                 }
 
                 int userId = reader.GetInt32(0);
-                context.SendMessageAsync($"login success {userId}");
+                context.SendAsync($"login success {userId}");
             }
             catch
             {
-                context.SendMessageAsync("login fail error");
+                context.SendAsync("login fail error");
             }
         }
     }

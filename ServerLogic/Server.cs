@@ -45,11 +45,6 @@ namespace WizardsServer
         {
             Console.WriteLine($"Ошибка в сессии клиента {Id}: {error}");
         }
-        public void SendMessageAsync(string message)
-        {
-            Console.WriteLine($"Trying to send message: {message}");
-            Send(message + "\r\n");
-        }
     }
     public class ConnectionContext : IConnectionContext
     {
@@ -60,9 +55,9 @@ namespace WizardsServer
             _client = client;
         }
 
-        public void SendMessageAsync(string message)
+        public void SendAsync(string message)
         {
-            _client.SendMessageAsync(message);
+            _client.SendAsync(message);
         }
     }
 }
