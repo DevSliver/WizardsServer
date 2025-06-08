@@ -20,24 +20,34 @@ class Match
     private void HandleMatchLoaded(string[] args, IConnectionContext context)
     {
         var player = GetPlayerByContext(context);
-        if (player == null || player.IsLoaded)
+        if (player == null)
+        {
+            Console.WriteLine("Получена команда match_loaded от неизвестного игрока.");
             return;
+        }
+        if (player.IsLoaded)
+        {
+            Console.WriteLine($"Игрок {player} уже загрузился ранее.");
+            return;
+        }
 
+        Console.WriteLine($"Игрок {player} загрузился.");
         player.MarkLoaded();
 
         if (Player1.IsLoaded && Player2.IsLoaded)
         {
-            CommandProcessor.Instance.Unsubscribe("match_loaded", HandleMatchLoaded);
             Console.WriteLine($"Матч {MatchId}: оба игрока загрузились.");
+            CommandProcessor.Instance.Unsubscribe("match_loaded", HandleMatchLoaded);
 
             Player1.MaxMana = 1;
             Player1.Mana = 1;
+            Console.WriteLine("Установлена мана для Player1: MaxMana=1, Mana=1");
 
             Player2.MaxMana = 1;
             Player2.Mana = 1;
+            Console.WriteLine("Установлена мана для Player2: MaxMana=1, Mana=1");
         }
     }
-
     private Player? GetPlayerByContext(IConnectionContext context)
     {
         if (Player1.Connection == context) return Player1;
