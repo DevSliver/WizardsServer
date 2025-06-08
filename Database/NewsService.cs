@@ -20,7 +20,7 @@ namespace WizardsServer
             }
 
             using var cmd = Database.CreateCommand(@"
-            SELECT title, published_at, content 
+            SELECT title, content, published_at 
             FROM news 
             ORDER BY published_at DESC 
             OFFSET @offset LIMIT 1");
@@ -34,10 +34,10 @@ namespace WizardsServer
             }
 
             string title = WrapWithBackticks(reader.GetString(0));
-            string date = WrapWithBackticks(reader.GetDateTime(1).ToString("yyyy-MM-dd HH:mm"));
-            string content = WrapWithBackticks(reader.GetString(2));
+            string content = WrapWithBackticks(reader.GetString(1));
+            string date = WrapWithBackticks(reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm"));
 
-            context.SendAsync($"news success {title} {date} {content}");
+            context.SendAsync($"news success {title} {content} {date}");
         }
         private string WrapWithBackticks(string text)
         {
