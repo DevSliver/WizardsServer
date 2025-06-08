@@ -23,6 +23,7 @@ namespace WizardsServer
 
             AuthService authService = new AuthService();
             MatchmakingService matchmakingService = new MatchmakingService();
+            NewsService newsService = new NewsService();
 
             // Сервер не отключается сам.
             await Task.Delay(-1);
