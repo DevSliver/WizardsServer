@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using WizardsServer.ServerLogic;
 
 namespace WizardsServer
 {
@@ -21,7 +22,7 @@ namespace WizardsServer
             Database.Initialize(connectionString);
 
             AuthService authService = new AuthService();
-            UserSettings userSettings = new UserSettings();
+            MatchmakingService matchmakingService = new MatchmakingService();
 
             // Сервер не отключается сам.
             await Task.Delay(-1);
