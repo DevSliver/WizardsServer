@@ -20,7 +20,7 @@ namespace WizardsServer
             }
 
             using var cmd = Database.CreateCommand(@"
-            SELECT title, date, content 
+            SELECT title, published_at, content 
             FROM news 
             ORDER BY published_at DESC 
             OFFSET @offset LIMIT 1");
