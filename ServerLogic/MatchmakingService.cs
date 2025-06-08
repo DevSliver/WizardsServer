@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WizardsServer.GameLogic;
 
-namespace WizardsServer.ServerLogic
+namespace WizardsServer
 {
     class MatchmakingService
     {
@@ -47,7 +43,6 @@ namespace WizardsServer.ServerLogic
             {
                 if (waitingSet.Remove(context))
                 {
-                    // Убираем из очереди
                     var newQueue = new Queue<IConnectionContext>(waitingPlayers.Where(p => p != context));
                     waitingPlayers.Clear();
                     foreach (var player in newQueue)
@@ -82,10 +77,10 @@ namespace WizardsServer.ServerLogic
         {
             var matchId = Guid.NewGuid();
 
+            GameManager.Instance.CreateMatch(matchId, player1, player2);
+
             player1.SendAsync($"match_start {matchId} 1");
             player2.SendAsync($"match_start {matchId} 2");
-
-            GameManager.Instance.CreateMatch(matchId, player1, player2);
         }
     }
 }

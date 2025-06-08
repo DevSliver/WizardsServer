@@ -5,29 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
-namespace WizardsServer.ServerLogic
+namespace WizardsServer.GameLogic
 {
-    public class GameManager
+    class GameManager
     {
         public static GameManager Instance { get; } = new GameManager();
 
-        private readonly ConcurrentDictionary<Guid, GameMatch> activeMatches = new();
+        private readonly ConcurrentDictionary<Guid, Match> activeMatches = new();
 
         private GameManager() { }
 
         public void CreateMatch(Guid matchId, IConnectionContext player1, IConnectionContext player2)
         {
-            var match = new GameMatch(matchId, player1, player2);
+            var match = new Match(matchId, player1, player2);
             if (!activeMatches.TryAdd(matchId, match))
             {
                 Console.WriteLine($"Матч с ID {matchId} уже существует!");
                 return;
             }
-
             Console.WriteLine($"Матч {matchId} создан между игроками.");
         }
-
-        public GameMatch? GetMatch(Guid matchId)
+        public Match? GetMatch(Guid matchId)
         {
             activeMatches.TryGetValue(matchId, out var match);
             return match;
