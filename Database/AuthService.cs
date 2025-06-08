@@ -15,11 +15,11 @@ namespace WizardsServer
             processor.Subscribe("login", HandleLogin);
         }
 
-        private void HandleRegister(string[] args, IConnectionContext context)
+        private void HandleRegister(string[] args, Client client)
         {
             if (args.Length != 2)
             {
-                context.SendAsync("register fail usage");
+                client.SendAsync("register fail usage");
                 return;
             }
 
@@ -32,7 +32,7 @@ namespace WizardsServer
                 checkCmd.Parameters.AddWithValue("u", username);
                 if (Convert.ToInt64(checkCmd.ExecuteScalar()) > 0)
                 {
-                    context.SendAsync("register fail user_exists");
+                    client.SendAsync("register fail user_exists");
                     return;
                 }
 
@@ -43,20 +43,20 @@ namespace WizardsServer
                 cmd.Parameters.AddWithValue("p", hash);
 
                 var userId = Convert.ToInt32(cmd.ExecuteScalar());
-                AuthenticateClient(context, userId);
-                context.SendAsync($"register success {userId}");
+                AuthenticateClient(client, userId);
+                client.SendAsync($"register success {userId}");
             }
             catch
             {
-                context.SendAsync("register fail error");
+                client.SendAsync("register fail error");
             }
         }
 
-        private void HandleLogin(string[] args, IConnectionContext context)
+        private void HandleLogin(string[] args, Client client)
         {
             if (args.Length != 2)
             {
-                context.SendAsync("login fail usage");
+                client.SendAsync("login fail usage");
                 return;
             }
 
@@ -71,30 +71,29 @@ namespace WizardsServer
                 using var reader = cmd.ExecuteReader();
                 if (!reader.Read())
                 {
-                    context.SendAsync("login fail user_not_found");
+                    client.SendAsync("login fail user_not_found");
                     return;
                 }
 
                 if (!BCrypt.Net.BCrypt.Verify(password, reader.GetString(1)))
                 {
-                    context.SendAsync("login fail wrong_password");
+                    client.SendAsync("login fail wrong_password");
                     return;
                 }
 
                 int userId = reader.GetInt32(0);
-                AuthenticateClient(context, userId);
-                context.SendAsync($"login success {userId}");
+                AuthenticateClient(client, userId);
+                client.SendAsync($"login success {userId}");
             }
             catch
             {
-                context.SendAsync("login fail error");
+                client.SendAsync("login fail error");
             }
         }
 
-        private void AuthenticateClient(IConnectionContext context, int userId)
+        private void AuthenticateClient(Client client, int userId)
         {
-            if (context is ConnectionContext ctx)
-                ctx.Client.Authenticate(userId);
+            client.Authenticate(userId);
         }
     }
 }

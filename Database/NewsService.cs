@@ -11,11 +11,11 @@ namespace WizardsServer
             CommandProcessor.Instance.Subscribe("get_news", HandleGetNews);
         }
 
-        private void HandleGetNews(string[] args, IConnectionContext context)
+        private void HandleGetNews(string[] args, Client client)
         {
             if (args.Length != 1 || !int.TryParse(args[0], out int newsNumber) || newsNumber < 1)
             {
-                context.SendAsync("news fail invalid_argument");
+                client.SendAsync("news fail invalid_argument");
                 return;
             }
 
@@ -29,7 +29,7 @@ namespace WizardsServer
             using var reader = cmd.ExecuteReader();
             if (!reader.Read())
             {
-                context.SendAsync("news fail not_found");
+                client.SendAsync("news fail not_found");
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace WizardsServer
             string content = WrapWithBackticks(reader.GetString(1));
             string date = WrapWithBackticks(reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm"));
 
-            context.SendAsync($"news success {title} {content} {date}");
+            client.SendAsync($"news success {title} {content} {date}");
         }
         private string WrapWithBackticks(string text)
         {

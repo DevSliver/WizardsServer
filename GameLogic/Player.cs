@@ -2,7 +2,7 @@
 
 class Player
 {
-    public IConnectionContext Connection { get; }
+    public Client Client { get; }
     public bool IsLoaded { get; private set; }
 
     private int maxMana;
@@ -34,9 +34,9 @@ class Player
         }
     }
 
-    public Player(IConnectionContext connection)
+    public Player(Client client)
     {
-        Connection = connection;
+        Client = client;
     }
 
     public void MarkLoaded()
@@ -46,6 +46,6 @@ class Player
 
     private void SendManaUpdate()
     {
-        Connection.SendAsync($"mana_update {Mana} {MaxMana}");
+        Client.SendAsync($"mana_update {Mana} {MaxMana}");
     }
 }

@@ -4,8 +4,8 @@ namespace WizardsServer
 {
     class MatchmakingService
     {
-        private readonly Queue<IConnectionContext> waitingPlayers = new();
-        private readonly HashSet<IConnectionContext> waitingSet = new();
+        private readonly Queue<Client> waitingPlayers = new();
+        private readonly HashSet<Client> waitingSet = new();
 
         public MatchmakingService()
         {
@@ -13,46 +13,46 @@ namespace WizardsServer
             CommandProcessor.Instance.Subscribe("cancel_match", HandleCancelMatch);
         }
 
-        private void HandleFindMatch(string[] args, IConnectionContext context)
+        private void HandleFindMatch(string[] args, Client client)
         {
-            if (context is not ConnectionContext ctx || ctx.Client.UserId is not int)
+            if (client.UserId is not int)
             {
-                context.SendAsync("matchmaking fail not_authenticated");
+                client.SendAsync("matchmaking fail not_authenticated");
                 return;
             }
 
             lock (waitingPlayers)
             {
-                if (waitingSet.Contains(context))
+                if (waitingSet.Contains(client))
                 {
-                    context.SendAsync("matchmaking fail already_waiting");
+                    client.SendAsync("matchmaking fail already_waiting");
                     return;
                 }
 
-                waitingPlayers.Enqueue(context);
-                waitingSet.Add(context);
+                waitingPlayers.Enqueue(client);
+                waitingSet.Add(client);
             }
 
-            context.SendAsync("matchmaking waiting");
+            client.SendAsync("matchmaking waiting");
             TryStartMatch();
         }
 
-        private void HandleCancelMatch(string[] args, IConnectionContext context)
+        private void HandleCancelMatch(string[] args, Client client)
         {
             lock (waitingPlayers)
             {
-                if (waitingSet.Remove(context))
+                if (waitingSet.Remove(client))
                 {
-                    var newQueue = new Queue<IConnectionContext>(waitingPlayers.Where(p => p != context));
+                    var newQueue = new Queue<Client>(waitingPlayers.Where(p => p != client));
                     waitingPlayers.Clear();
                     foreach (var player in newQueue)
                         waitingPlayers.Enqueue(player);
 
-                    context.SendAsync("matchmaking cancelled");
+                    client.SendAsync("matchmaking cancelled");
                 }
                 else
                 {
-                    context.SendAsync("matchmaking fail not_waiting");
+                    client.SendAsync("matchmaking fail not_waiting");
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace WizardsServer
             }
         }
 
-        private void StartMatch(IConnectionContext player1, IConnectionContext player2)
+        private void StartMatch(Client player1, Client player2)
         {
             var matchId = Guid.NewGuid();
 

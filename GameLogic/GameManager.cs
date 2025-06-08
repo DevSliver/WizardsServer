@@ -15,7 +15,7 @@ namespace WizardsServer.GameLogic
 
         private GameManager() { }
 
-        public void CreateMatch(Guid matchId, IConnectionContext player1, IConnectionContext player2)
+        public void CreateMatch(Guid matchId, Client player1, Client player2)
         {
             var match = new Match(matchId, player1, player2);
             if (!activeMatches.TryAdd(matchId, match))

@@ -6,20 +6,15 @@ using NetCoreServer;
 
 namespace WizardsServer
 {
-    public interface IConnectionContext
-    {
-        void SendAsync(string message);
-    }
-
     public class CommandProcessor
     {
         public static CommandProcessor Instance { get; } = new CommandProcessor();
 
-        private readonly Dictionary<string, Action<string[], IConnectionContext>> _handlers = new();
+        private readonly Dictionary<string, Action<string[], Client>> _handlers = new();
 
         private CommandProcessor() { }
 
-        public void Subscribe(string command, Action<string[], IConnectionContext> handler)
+        public void Subscribe(string command, Action<string[], Client> handler)
         {
             if (!_handlers.ContainsKey(command))
                 _handlers[command] = delegate { };
@@ -27,13 +22,13 @@ namespace WizardsServer
             _handlers[command] += handler;
         }
 
-        public void Unsubscribe(string command, Action<string[], IConnectionContext> handler)
+        public void Unsubscribe(string command, Action<string[], Client> handler)
         {
             if (_handlers.ContainsKey(command))
                 _handlers[command] -= handler;
         }
 
-        public void ProcessCommand(string commandLine, IConnectionContext context)
+        public void ProcessCommand(string commandLine, Client client)
         {
             if (string.IsNullOrWhiteSpace(commandLine))
                 return;
@@ -48,7 +43,7 @@ namespace WizardsServer
 
             if (_handlers.TryGetValue(command, out var handlers))
             {
-                handlers.Invoke(args, context);
+                handlers.Invoke(args, client);
             }
         }
 

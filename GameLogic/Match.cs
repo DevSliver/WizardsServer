@@ -7,7 +7,7 @@ class Match
     public Player Player1 { get; }
     public Player Player2 { get; }
 
-    public Match(Guid matchId, IConnectionContext player1Conn, IConnectionContext player2Conn)
+    public Match(Guid matchId, Client player1Conn, Client player2Conn)
     {
         MatchId = matchId;
 
@@ -17,9 +17,9 @@ class Match
         CommandProcessor.Instance.Subscribe("match_loaded", HandleMatchLoaded);
     }
 
-    private void HandleMatchLoaded(string[] args, IConnectionContext context)
+    private void HandleMatchLoaded(string[] args, Client client)
     {
-        var player = GetPlayerByContext(context);
+        var player = GetPlayerByContext(client);
         if (player == null)
         {
             Console.WriteLine("Получена команда match_loaded от неизвестного игрока.");
@@ -48,10 +48,10 @@ class Match
             Console.WriteLine("Установлена мана для Player2: MaxMana=1, Mana=1");
         }
     }
-    private Player? GetPlayerByContext(IConnectionContext context)
+    private Player? GetPlayerByContext(Client client)
     {
-        if (Player1.Connection == context) return Player1;
-        if (Player2.Connection == context) return Player2;
+        if (Player1.Client == client) return Player1;
+        if (Player2.Client == client) return Player2;
         return null;
     }
 }
