@@ -52,7 +52,7 @@ public class Server : TcpServer
     public void OnSessionError(TcpSession tcpSession, System.Net.Sockets.SocketError error)
     {
         Console.WriteLine($"Ошибка в сессии {tcpSession.Id}: {error}");
-        OnDisconnected(tcpSession);
+        // OnDisconnected(tcpSession);
     }
     protected override void OnDisconnected(TcpSession tcpSession)
     {
@@ -62,6 +62,7 @@ public class Server : TcpServer
         Console.WriteLine($"Сессия с ID {tcpSession.Id} отключена.");
 
         client.Match?.OnPlayerDisconnect(client);
+        client.Dispose();
         _clients.TryRemove(tcpSession, out _);
     }
     protected override void OnConnected(TcpSession tcpSession)
