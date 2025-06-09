@@ -11,7 +11,6 @@ public static class Database
     {
         _connectionString = connectionString;
 
-        // Проверочное подключение, чтобы убедиться, что строка валидна
         using var connection = new NpgsqlConnection(_connectionString);
         connection.Open();
         Console.WriteLine("Подключение к базе данных установлено");
@@ -24,9 +23,6 @@ public static class Database
 
         var command = new NpgsqlCommand(sql, connection);
 
-        // Чтобы соединение не пропало, привязываем его к команде и закрываем позже вручную
         return command;
     }
 }
-
-

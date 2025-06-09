@@ -51,8 +51,10 @@ namespace WizardsServer
                 using var cmd = Database.CreateCommand("INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id");
                 cmd.Parameters.AddWithValue("u", username);
                 cmd.Parameters.AddWithValue("p", hash);
-
                 var userId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                cmd.Connection.Close();
+
                 AuthenticateClient(client, userId);
                 client.SendAsync($"register success");
             }

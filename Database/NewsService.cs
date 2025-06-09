@@ -47,6 +47,8 @@ namespace WizardsServer
             string content = WrapWithBackticks(reader.GetString(1));
             string date = WrapWithBackticks(reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm"));
 
+            cmd.Connection.Close();
+
             client.SendAsync($"news success {title} {content} {date}");
         }
         private string WrapWithBackticks(string text)
