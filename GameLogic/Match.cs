@@ -72,5 +72,6 @@ public class Match
         int playerNumber = (Player1.Client == disconectedClient) ? 1 : 2;
 
         Player1.Client.SendAsync($"match_end player_disconected {playerNumber}");
+        Player2.Client.SendAsync($"match_end player_disconected {playerNumber}");
     }
 }
