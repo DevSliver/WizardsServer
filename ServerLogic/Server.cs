@@ -81,7 +81,7 @@ public class Session : TcpSession
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
         string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-        Console.WriteLine($"{Id} - Получено сообщение:\n{message}");
+        Console.WriteLine($"{Id} - Получено сообщение: {message}");
         Client.RecieveCommand(message);
     }
     protected override void OnError(System.Net.Sockets.SocketError error)
@@ -124,7 +124,7 @@ public class Client : IDisposable
     }
     public bool SendAsync(string message)
     {
-        Console.WriteLine($"{Session.Id} - Отправлено сообщение:\n{message}");
+        Console.WriteLine($"{Session.Id} - Отправлено сообщение: {message}");
         return Session.SendAsync(message);
     }
 
