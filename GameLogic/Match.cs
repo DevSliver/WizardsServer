@@ -43,14 +43,6 @@ public class Match
         {
             Console.WriteLine($"Матч {Id}: оба игрока загрузились.");
             CommandProcessor.Unsubscribe("match_loaded", HandleMatchLoaded);
-
-            Player1.MaxMana = 1;
-            Player1.Mana = 1;
-            Console.WriteLine("Установлена мана для Player1: MaxMana=1, Mana=1");
-
-            Player2.MaxMana = 1;
-            Player2.Mana = 1;
-            Console.WriteLine("Установлена мана для Player2: MaxMana=1, Mana=1");
         }
     }
     private Player? GetPlayerByCleint(Client client)
