@@ -21,6 +21,10 @@ public class CommandProcessor
         if (_handlers.ContainsKey(command))
             _handlers[command] -= handler;
     }
+    public void ClearAllSubscriptions()
+    {
+        _handlers.Clear();
+    }
 
     public void ProcessCommand(string commandLine, Client client)
     {

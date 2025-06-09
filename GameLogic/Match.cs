@@ -14,11 +14,8 @@ public class Match
         Player1 = new Player(client1);
         Player2 = new Player(client2);
 
-        client1.Match = this;
-        client2.Match = this;
-
-        client1.Player = Player1;
-        client2.Player = Player2;
+        client1.SetMatchInfo(this, Player1);
+        client2.SetMatchInfo(this, Player2);
 
         CommandProcessor = new CommandProcessor();
 
@@ -61,5 +58,19 @@ public class Match
         if (Player1.Client == client) return Player1;
         if (Player2.Client == client) return Player2;
         return null;
+    }
+
+    public void OnPlayerDisconnect(Client disconectedClient)
+    {
+        Player1.Client.SetMatchInfo(null, null);
+        Player1.Client.SetMatchInfo(null, null);
+
+        CommandProcessor.ClearAllSubscriptions();
+
+        Server.Instance.GameManager.RemoveMatch(Id);
+
+        int playerNumber = (Player1.Client == disconectedClient) ? 1 : 2;
+
+        Player1.Client.SendAsync($"match_end player_disconected {playerNumber}");
     }
 }

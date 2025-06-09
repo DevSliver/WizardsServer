@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using NetCoreServer;
 using WizardsServer.GameLogic;
+using System.Data;
 
 public class Server : TcpServer
 {
@@ -38,38 +39,44 @@ public class Server : TcpServer
         _clients.TryAdd(session, client);
         return session;
     }
-    protected override void OnDisconnected(TcpSession session)
+    public void OnSessionError(TcpSession tcpSession, System.Net.Sockets.SocketError error)
     {
-        _clients.TryRemove(session, out _);
+        Console.WriteLine($"Ошибка в сессии {tcpSession.Id}: {error}");
+        OnDisconnected(tcpSession);
+    }
+    protected override void OnDisconnected(TcpSession tcpSession)
+    {
+        Client client = Clients[tcpSession];
+        Session session = client.Session;
+
+        Console.WriteLine($"Сессия с ID {tcpSession.Id} отключена.");
+
+        client.Match?.OnPlayerDisconnect(client);
+        _clients.TryRemove(tcpSession, out _);
+    }
+    protected override void OnConnected(TcpSession tcpSession)
+    {
+        Console.WriteLine($"Сессия с ID {tcpSession.Id} подключена.");
     }
 }
 public class Session : TcpSession
 {
     private Server _server;
+    public Client Client => _server.Clients[this];
+
     public Session(Server server) : base(server)
     {
         _server = server;
-    }
-    protected override void OnConnected()
-    {
-        Console.WriteLine($"Сессия с ID {Id} подключена.");
     }
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
         string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
         Console.WriteLine($"Получено от сессии {Id}: {message}");
-        if(_server.Clients.TryGetValue(this, out var client))
-        {
-            client.RecieveCommand(message);
-        }
-    }
-    protected override void OnDisconnected()
-    {
-        Console.WriteLine($"Сессия с ID {Id} отключена.");
+        Client.RecieveCommand(message);
     }
     protected override void OnError(System.Net.Sockets.SocketError error)
     {
-        Console.WriteLine($"Ошибка в сессии {Id}: {error}");
+        _server.OnSessionError(this, error);
     }
 }
 public class Client
@@ -102,5 +109,11 @@ public class Client
     public bool SendAsync(string message)
     {
         return Session.SendAsync(message);
+    }
+
+    public void SetMatchInfo(Match? match, Player? player)
+    {
+        Match = match;
+        Player = player;
     }
 }
