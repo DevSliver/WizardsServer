@@ -11,15 +11,19 @@ namespace WizardsServer
         public AuthService()
         {
             var processor = Server.Instance.CommandProcessor;
+            processor.Subscribe("auth", ProcessCommand);
             processor.Subscribe("register", HandleRegister);
             processor.Subscribe("login", HandleLogin);
         }
-
+        private void ProcessCommand(string[] args, Client client)
+        {
+            Server.Instance.CommandProcessor.ProcessCommand(args, client);
+        }
         private void HandleRegister(string[] args, Client client)
         {
             if (args.Length != 2)
             {
-                client.SendAsync("register fail usage");
+                client.SendAsync("register error usage");
                 return;
             }
 
@@ -32,7 +36,7 @@ namespace WizardsServer
                 checkCmd.Parameters.AddWithValue("u", username);
                 if (Convert.ToInt64(checkCmd.ExecuteScalar()) > 0)
                 {
-                    client.SendAsync("register fail user_exists");
+                    client.SendAsync("register error user_exists");
                     return;
                 }
 
@@ -44,11 +48,11 @@ namespace WizardsServer
 
                 var userId = Convert.ToInt32(cmd.ExecuteScalar());
                 AuthenticateClient(client, userId);
-                client.SendAsync($"register success {userId}");
+                client.SendAsync($"register success");
             }
-            catch
+            catch (Exception ex)
             {
-                client.SendAsync("register fail error");
+                client.SendAsync($"register error unknown");
             }
         }
 
@@ -56,7 +60,7 @@ namespace WizardsServer
         {
             if (args.Length != 2)
             {
-                client.SendAsync("login fail usage");
+                client.SendAsync("login error usage");
                 return;
             }
 
@@ -71,23 +75,23 @@ namespace WizardsServer
                 using var reader = cmd.ExecuteReader();
                 if (!reader.Read())
                 {
-                    client.SendAsync("login fail user_not_found");
+                    client.SendAsync("login error user_not_found");
                     return;
                 }
 
                 if (!BCrypt.Net.BCrypt.Verify(password, reader.GetString(1)))
                 {
-                    client.SendAsync("login fail wrong_password");
+                    client.SendAsync("login error wrong_password");
                     return;
                 }
 
                 int userId = reader.GetInt32(0);
                 AuthenticateClient(client, userId);
-                client.SendAsync($"login success {userId}");
+                client.SendAsync($"login success");
             }
             catch
             {
-                client.SendAsync("login fail error");
+                client.SendAsync("login error unknown");
             }
         }
 

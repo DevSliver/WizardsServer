@@ -2,10 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 public class CommandProcessor
 {
+    private static CommandProcessor _global = new CommandProcessor();
+    public static CommandProcessor Global => _global;
+
     private readonly Dictionary<string, Action<string[], Client>> _handlers = new();
 
     public void Subscribe(string command, Action<string[], Client> handler)
@@ -25,26 +29,19 @@ public class CommandProcessor
     {
         _handlers.Clear();
     }
-
-    public void ProcessCommand(string commandLine, Client client)
+    public void ProcessCommand(string[] commandArray, Client client)
     {
-        if (string.IsNullOrWhiteSpace(commandLine))
+        if (commandArray == null || commandArray.Length == 0)
             return;
 
-        var parts = SplitCommandLine(commandLine);
+        string[] args = commandArray.Length > 1 ? commandArray[1..] : Array.Empty<string>();
 
-        if (parts.Count == 0)
-            return;
-
-        string command = parts[0].ToLowerInvariant();
-        string[] args = parts.Count > 1 ? parts.GetRange(1, parts.Count - 1).ToArray() : Array.Empty<string>();
-
-        if (_handlers.TryGetValue(command, out var handlers))
+        if (_handlers.TryGetValue(commandArray[0], out var handlers))
         {
             handlers.Invoke(args, client);
         }
     }
-    public static List<string> SplitCommandLine(string commandLine)
+    public static string[] SplitCommandLine(string commandLine)
     {
         var args = new List<string>();
         var current = new StringBuilder();
@@ -79,6 +76,6 @@ public class CommandProcessor
             args.Add(current.ToString());
         }
 
-        return args;
+        return args.ToArray();
     }
 }

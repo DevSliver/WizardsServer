@@ -13,24 +13,35 @@ public class Server : TcpServer
     private static Server? _instance;
     public static Server Instance => _instance ?? throw new InvalidOperationException("Server is not initialized");
 
+    private ConcurrentDictionary<TcpSession, Client> _clients;
     private CommandProcessor _commandProcessor;
     private GameManager _gameManager;
+    private AuthService _authService;
+    private NewsService _newsService;
+    private MatchmakingService _matchmakingService;
+
+    public ConcurrentDictionary<TcpSession, Client> Clients => _clients;
     public CommandProcessor CommandProcessor => _commandProcessor;
     public GameManager GameManager => _gameManager;
-
-    private ConcurrentDictionary<TcpSession, Client> _clients;
-    public ConcurrentDictionary<TcpSession, Client> Clients => _clients;
+    public AuthService AuthService => _authService;
+    public NewsService NewsService => _newsService;
+    public MatchmakingService MatchmakingService => _matchmakingService;
 
     public Server(IPAddress address, int port) : base(address, port)
     {
         if (_instance != null)
             throw new InvalidOperationException("Server instance already created");
 
-        _clients = new();
-        _commandProcessor = new();
-        _gameManager = new();
-
         _instance = this;
+
+        _clients = new ConcurrentDictionary<TcpSession, Client>();
+
+        // CommandProcessor must be first!
+        _commandProcessor = new CommandProcessor();
+        _gameManager = new GameManager();
+        _authService = new AuthService();
+        _newsService = new NewsService();
+        _matchmakingService = new MatchmakingService();
     }
     protected override TcpSession CreateSession()
     {
@@ -79,7 +90,7 @@ public class Session : TcpSession
         _server.OnSessionError(this, error);
     }
 }
-public class Client
+public class Client : IDisposable
 {
     public int? UserId { get; set; }
     public bool IsAuthenticated => UserId.HasValue;
@@ -93,7 +104,15 @@ public class Client
     public Client(Session session)
     {
         _session = session;
+
+        CommandProcessor.Global.Subscribe("server", OnServerCommand);
+        CommandProcessor.Global.Subscribe("match", OnMatchCommand);
     }
+
+    private void OnServerCommand(string[] args, Client client) =>
+        Server.Instance.CommandProcessor.ProcessCommand(args, client);
+    private void OnMatchCommand(string[] args, Client client) =>
+        Match?.CommandProcessor.ProcessCommand(args, client);
 
     public void Authenticate(int userId)
     {
@@ -101,19 +120,21 @@ public class Client
     }
     public void RecieveCommand(string command)
     {
-        if (InMatch)
-            Match?.CommandProcessor.ProcessCommand(command, this);
-        else
-            Server.Instance.CommandProcessor.ProcessCommand(command, this);
+        var args = CommandProcessor.SplitCommandLine(command);
+        CommandProcessor.Global.ProcessCommand(args, this);
     }
-    public bool SendAsync(string message)
-    {
-        return Session.SendAsync(message);
-    }
+    public bool SendAsync(string message) =>
+        Session.SendAsync(message);
 
     public void SetMatchInfo(Match? match, Player? player)
     {
         Match = match;
         Player = player;
+    }
+
+    public void Dispose()
+    {
+        CommandProcessor.Global.Unsubscribe("Server", OnServerCommand);
+        CommandProcessor.Global.Unsubscribe("Match", OnMatchCommand);
     }
 }
