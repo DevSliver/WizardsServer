@@ -104,9 +104,6 @@ public class Client : IDisposable
     public Client(Session session)
     {
         _session = session;
-
-        CommandProcessor.Global.Subscribe("server", OnServerCommand);
-        CommandProcessor.Global.Subscribe("match", OnMatchCommand);
     }
 
     private void OnServerCommand(string[] args, Client client) =>
@@ -121,7 +118,15 @@ public class Client : IDisposable
     public void RecieveCommand(string command)
     {
         var args = CommandProcessor.SplitCommandLine(command);
-        CommandProcessor.Global.ProcessCommand(args, this);
+        switch (args[0])
+        {
+            case "server":
+                OnServerCommand(args[1..], this);
+                break;
+            case "match":
+                OnMatchCommand(args[1..], this);
+                break;
+        }
     }
     public int sends = 0;
     public bool SendAsync(string message)
