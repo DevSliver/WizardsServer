@@ -19,7 +19,7 @@ public class Match
 
         CommandProcessor = new CommandProcessor();
 
-        CommandProcessor.Subscribe("match_loaded", HandleMatchLoaded);
+        CommandProcessor.Subscribe("loaded", HandleMatchLoaded);
     }
 
     private void HandleMatchLoaded(string[] args, Client client)
@@ -27,7 +27,7 @@ public class Match
         var player = GetPlayerByCleint(client);
         if (player == null)
         {
-            Console.WriteLine("Получена команда match_loaded от неизвестного игрока.");
+            Console.WriteLine("Получена команда match loaded от неизвестного игрока.");
             return;
         }
         if (player.IsLoaded)
@@ -42,7 +42,7 @@ public class Match
         if (Player1.IsLoaded && Player2.IsLoaded)
         {
             Console.WriteLine($"Матч {Id}: оба игрока загрузились.");
-            CommandProcessor.Unsubscribe("match_loaded", HandleMatchLoaded);
+            CommandProcessor.Unsubscribe("loaded", HandleMatchLoaded);
         }
     }
     private Player? GetPlayerByCleint(Client client)
@@ -63,7 +63,7 @@ public class Match
 
         int playerNumber = (Player1.Client == disconectedClient) ? 1 : 2;
 
-        Player1.Client.SendAsync($"match_end player_disconected {playerNumber}");
-        Player2.Client.SendAsync($"match_end player_disconected {playerNumber}");
+        Player1.Client.SendAsync($"match end player_disconected {playerNumber}");
+        Player2.Client.SendAsync($"match end player_disconected {playerNumber}");
     }
 }

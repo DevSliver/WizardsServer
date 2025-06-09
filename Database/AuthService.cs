@@ -12,14 +12,20 @@ namespace WizardsServer
         {
             var processor = Server.Instance.CommandProcessor;
             processor.Subscribe("auth", ProcessCommand);
-            processor.Subscribe("register", HandleRegister);
-            processor.Subscribe("login", HandleLogin);
         }
         private void ProcessCommand(string[] args, Client client)
         {
-            Server.Instance.CommandProcessor.ProcessCommand(args, client);
+            switch (args[0])
+            {
+                case "register":
+                    Register(args[1..], client);
+                    break;
+                case "login":
+                    Login(args[1..], client);
+                    break;
+            }
         }
-        private void HandleRegister(string[] args, Client client)
+        private void Register(string[] args, Client client)
         {
             if (args.Length != 2)
             {
@@ -56,7 +62,7 @@ namespace WizardsServer
             }
         }
 
-        private void HandleLogin(string[] args, Client client)
+        private void Login(string[] args, Client client)
         {
             if (args.Length != 2)
             {

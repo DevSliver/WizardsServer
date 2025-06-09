@@ -6,7 +6,6 @@ using System.Net;
 using System.Text;
 using NetCoreServer;
 using WizardsServer.GameLogic;
-using System.Data;
 
 public class Server : TcpServer
 {

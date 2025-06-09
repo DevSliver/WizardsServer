@@ -7,15 +7,26 @@ public class MatchmakingService
 
     public MatchmakingService()
     {
-        Server.Instance.CommandProcessor.Subscribe("find_match", HandleFindMatch);
-        Server.Instance.CommandProcessor.Subscribe("cancel_match", HandleCancelMatch);
+        Server.Instance.CommandProcessor.Subscribe("matchmaking", ProcessCommand);
+    }
+    private void ProcessCommand(string[] args, Client client)
+    {
+        switch (args[0])
+        {
+            case "start_searching":
+                StartSearching(args[1..], client);
+                break;
+            case "cancel_searching":
+                CancelSearching(args[1..], client);
+                break;
+        }
     }
 
-    private void HandleFindMatch(string[] args, Client client)
+    private void StartSearching(string[] args, Client client)
     {
         if (!client.IsAuthenticated)
         {
-            client.SendAsync("matchmaking fail not_authenticated");
+            client.SendAsync("matchmaking error not_authenticated");
             return;
         }
 
@@ -23,7 +34,7 @@ public class MatchmakingService
         {
             if (waitingSet.Contains(client))
             {
-                client.SendAsync("matchmaking fail already_waiting");
+                client.SendAsync("matchmaking error already_waiting");
                 return;
             }
 
@@ -35,7 +46,7 @@ public class MatchmakingService
         TryStartMatch();
     }
 
-    private void HandleCancelMatch(string[] args, Client client)
+    private void CancelSearching(string[] args, Client client)
     {
         lock (waitingPlayers)
         {
@@ -50,7 +61,7 @@ public class MatchmakingService
             }
             else
             {
-                client.SendAsync("matchmaking fail not_waiting");
+                client.SendAsync("matchmaking error not_waiting");
             }
         }
     }

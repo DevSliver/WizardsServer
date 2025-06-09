@@ -14,8 +14,8 @@ public class GameManager
         _matches.TryAdd(id, match);
         Console.WriteLine($"Матч {id} создан");
 
-        client1.SendAsync($"match_start {id} 1");
-        client2.SendAsync($"match_start {id} 2");
+        client1.SendAsync($"matchmaking creating_match {id} 1");
+        client2.SendAsync($"matchmaking creating_match {id} 2");
     }
     public bool RemoveMatch(Guid id)
     {

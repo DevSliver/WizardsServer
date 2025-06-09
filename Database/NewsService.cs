@@ -10,14 +10,18 @@ namespace WizardsServer
         public NewsService()
         {
             Server.Instance.CommandProcessor.Subscribe("news", ProcessCommand);
-            Server.Instance.CommandProcessor.Subscribe("get", HandleGetNews);
         }
         private void ProcessCommand(string[] args, Client client)
         {
-            Server.Instance.CommandProcessor.ProcessCommand(args, client);
+            switch (args[0])
+            {
+                case "get":
+                    GetNews(args[1..], client);
+                    break;
+            }
         }
 
-        private void HandleGetNews(string[] args, Client client)
+        private void GetNews(string[] args, Client client)
         {
             if (args.Length != 1 || !int.TryParse(args[0], out int newsNumber) || newsNumber < 1)
             {
@@ -43,7 +47,7 @@ namespace WizardsServer
             string content = WrapWithBackticks(reader.GetString(1));
             string date = WrapWithBackticks(reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm"));
 
-            client.SendAsync($"news get {title} {content} {date}");
+            client.SendAsync($"news success {title} {content} {date}");
         }
         private string WrapWithBackticks(string text)
         {
