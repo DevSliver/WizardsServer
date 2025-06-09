@@ -1,8 +1,9 @@
 ﻿namespace WizardsServer.GameLogic;
 
-class Player
+public class Player
 {
     public Client Client { get; }
+
     public bool IsLoaded { get; private set; }
 
     private int maxMana;

@@ -10,7 +10,7 @@ namespace WizardsServer
     {
         public AuthService()
         {
-            var processor = CommandProcessor.Instance;
+            var processor = Server.Instance.CommandProcessor;
             processor.Subscribe("register", HandleRegister);
             processor.Subscribe("login", HandleLogin);
         }

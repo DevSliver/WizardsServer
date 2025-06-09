@@ -1,25 +1,33 @@
 ﻿namespace WizardsServer.GameLogic;
 
-class Match
+public class Match
 {
-    public Guid MatchId { get; }
+    public Guid Id { get; }
 
     public Player Player1 { get; }
     public Player Player2 { get; }
+    public CommandProcessor CommandProcessor { get; }
 
-    public Match(Guid matchId, Client player1Conn, Client player2Conn)
+    public Match(Guid id, Client client1, Client client2)
     {
-        MatchId = matchId;
+        Id = id;
+        Player1 = new Player(client1);
+        Player2 = new Player(client2);
 
-        Player1 = new Player(player1Conn);
-        Player2 = new Player(player2Conn);
+        client1.Match = this;
+        client2.Match = this;
 
-        CommandProcessor.Instance.Subscribe("match_loaded", HandleMatchLoaded);
+        client1.Player = Player1;
+        client2.Player = Player2;
+
+        CommandProcessor = new CommandProcessor();
+
+        CommandProcessor.Subscribe("match_loaded", HandleMatchLoaded);
     }
 
     private void HandleMatchLoaded(string[] args, Client client)
     {
-        var player = GetPlayerByContext(client);
+        var player = GetPlayerByCleint(client);
         if (player == null)
         {
             Console.WriteLine("Получена команда match_loaded от неизвестного игрока.");
@@ -36,8 +44,8 @@ class Match
 
         if (Player1.IsLoaded && Player2.IsLoaded)
         {
-            Console.WriteLine($"Матч {MatchId}: оба игрока загрузились.");
-            CommandProcessor.Instance.Unsubscribe("match_loaded", HandleMatchLoaded);
+            Console.WriteLine($"Матч {Id}: оба игрока загрузились.");
+            CommandProcessor.Unsubscribe("match_loaded", HandleMatchLoaded);
 
             Player1.MaxMana = 1;
             Player1.Mana = 1;
@@ -48,7 +56,7 @@ class Match
             Console.WriteLine("Установлена мана для Player2: MaxMana=1, Mana=1");
         }
     }
-    private Player? GetPlayerByContext(Client client)
+    private Player? GetPlayerByCleint(Client client)
     {
         if (Player1.Client == client) return Player1;
         if (Player2.Client == client) return Player2;

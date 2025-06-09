@@ -8,7 +8,7 @@ namespace WizardsServer
     {
         public NewsService()
         {
-            CommandProcessor.Instance.Subscribe("get_news", HandleGetNews);
+            Server.Instance.CommandProcessor.Subscribe("get_news", HandleGetNews);
         }
 
         private void HandleGetNews(string[] args, Client client)

@@ -9,13 +9,13 @@ namespace WizardsServer
 
         public MatchmakingService()
         {
-            CommandProcessor.Instance.Subscribe("find_match", HandleFindMatch);
-            CommandProcessor.Instance.Subscribe("cancel_match", HandleCancelMatch);
+            Server.Instance.CommandProcessor.Subscribe("find_match", HandleFindMatch);
+            Server.Instance.CommandProcessor.Subscribe("cancel_match", HandleCancelMatch);
         }
 
         private void HandleFindMatch(string[] args, Client client)
         {
-            if (client.UserId is not int)
+            if (!client.IsAuthenticated)
             {
                 client.SendAsync("matchmaking fail not_authenticated");
                 return;
@@ -75,12 +75,7 @@ namespace WizardsServer
 
         private void StartMatch(Client player1, Client player2)
         {
-            var matchId = Guid.NewGuid();
-
-            GameManager.Instance.CreateMatch(matchId, player1, player2);
-
-            player1.SendAsync($"match_start {matchId} 1");
-            player2.SendAsync($"match_start {matchId} 2");
+            Server.Instance.GameManager.CreateMatch(player1, player2);
         }
     }
 }

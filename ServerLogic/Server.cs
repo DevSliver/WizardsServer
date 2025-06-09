@@ -3,70 +3,104 @@
 using System.Collections.Concurrent;
 using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using NetCoreServer;
+using WizardsServer.GameLogic;
 
 public class Server : TcpServer
 {
-    private readonly ConcurrentDictionary<Guid, Client> _clients = new();
     private static Server? _instance;
-
     public static Server Instance => _instance ?? throw new InvalidOperationException("Server is not initialized");
+
+    private CommandProcessor _commandProcessor;
+    private GameManager _gameManager;
+    public CommandProcessor CommandProcessor => _commandProcessor;
+    public GameManager GameManager => _gameManager;
+
+    private ConcurrentDictionary<TcpSession, Client> _clients;
+    public ConcurrentDictionary<TcpSession, Client> Clients => _clients;
 
     public Server(IPAddress address, int port) : base(address, port)
     {
         if (_instance != null)
             throw new InvalidOperationException("Server instance already created");
 
+        _clients = new();
+        _commandProcessor = new();
+        _gameManager = new();
+
         _instance = this;
     }
     protected override TcpSession CreateSession()
     {
-        var client = new Client(this);
-        client.DisconnectedEvent += OnClientDisconnected;
-        _clients[client.Id] = client;
-        return client;
+        var session = new Session(this);
+        var client = new Client(session);
+        _clients.TryAdd(session, client);
+        return session;
     }
-
-    private void OnClientDisconnected(Client client)
+    protected override void OnDisconnected(TcpSession session)
     {
-        _clients.TryRemove(client.Id, out _);
-        client.DisconnectedEvent -= OnClientDisconnected;
+        _clients.TryRemove(session, out _);
     }
-
-    public ConcurrentDictionary<Guid, Client> GetClients() => _clients;
 }
-
-public class Client : TcpSession
+public class Session : TcpSession
+{
+    private Server _server;
+    public Session(Server server) : base(server)
+    {
+        _server = server;
+    }
+    protected override void OnConnected()
+    {
+        Console.WriteLine($"Сессия с ID {Id} подключена.");
+    }
+    protected override void OnReceived(byte[] buffer, long offset, long size)
+    {
+        string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+        Console.WriteLine($"Получено от сессии {Id}: {message}");
+        if(_server.Clients.TryGetValue(this, out var client))
+        {
+            client.RecieveCommand(message);
+        }
+    }
+    protected override void OnDisconnected()
+    {
+        Console.WriteLine($"Сессия с ID {Id} отключена.");
+    }
+    protected override void OnError(System.Net.Sockets.SocketError error)
+    {
+        Console.WriteLine($"Ошибка в сессии {Id}: {error}");
+    }
+}
+public class Client
 {
     public int? UserId { get; set; }
     public bool IsAuthenticated => UserId.HasValue;
-    public event Action<Client>? DisconnectedEvent;
+    private Session _session;
+    public Session Session => _session;
 
-    public Client(TcpServer server) : base(server) { }
+    public Match? Match { get; set; }
+    public Player? Player { get; set; }
+    public bool InMatch { get; set; } = false;
+
+    public Client(Session session)
+    {
+        _session = session;
+    }
 
     public void Authenticate(int userId)
     {
         UserId = userId;
     }
-    protected override void OnConnected()
+    public void RecieveCommand(string command)
     {
-        Console.WriteLine($"Клиент с ID {Id} подключен.");
+        if (InMatch)
+            Match?.CommandProcessor.ProcessCommand(command, this);
+        else
+            Server.Instance.CommandProcessor.ProcessCommand(command, this);
     }
-    protected override void OnReceived(byte[] buffer, long offset, long size)
+    public bool SendAsync(string message)
     {
-        string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-        Console.WriteLine($"Получено от клиента {Id}: {message}");
-        CommandProcessor.Instance.ProcessCommand(message, this);
-    }
-    protected override void OnDisconnected()
-    {
-        DisconnectedEvent?.Invoke(this);
-        Console.WriteLine($"Клиент с ID {Id} отключен.");
-    }
-    protected override void OnError(SocketError error)
-    {
-        Console.WriteLine($"Ошибка в сессии клиента {Id}: {error}");
+        return Session.SendAsync(message);
     }
 }

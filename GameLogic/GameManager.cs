@@ -1,39 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace WizardsServer.GameLogic;
+
+using System;
 using System.Collections.Concurrent;
 
-namespace WizardsServer.GameLogic
+public class GameManager
 {
-    class GameManager
+    private readonly ConcurrentDictionary<Guid, Match> _matches = new();
+
+    public void CreateMatch(Client client1, Client client2)
     {
-        public static GameManager Instance { get; } = new GameManager();
+        var id = Guid.NewGuid();
+        var match = new Match(id, client1, client2);
+        _matches.TryAdd(id, match);
+        Console.WriteLine($"Матч {id} создан");
 
-        private readonly ConcurrentDictionary<Guid, Match> activeMatches = new();
-
-        private GameManager() { }
-
-        public void CreateMatch(Guid matchId, Client player1, Client player2)
+        client1.SendAsync($"match_start {id} 1");
+        client2.SendAsync($"match_start {id} 2");
+    }
+    public bool RemoveMatch(Guid id)
+    {
+        if (_matches.TryRemove(id, out var match))
         {
-            var match = new Match(matchId, player1, player2);
-            if (!activeMatches.TryAdd(matchId, match))
-            {
-                Console.WriteLine($"Матч с ID {matchId} уже существует!");
-                return;
-            }
-            Console.WriteLine($"Матч {matchId} создан между игроками.");
-        }
-        public Match? GetMatch(Guid matchId)
-        {
-            activeMatches.TryGetValue(matchId, out var match);
-            return match;
+            Console.WriteLine($"Матч {id} удалён");
+            return true;
         }
 
-        public bool RemoveMatch(Guid matchId)
-        {
-            return activeMatches.TryRemove(matchId, out _);
-        }
+        Console.WriteLine($"Матч {id} не найден для удаления");
+        return false;
+    }
+    public Match? GetMatch(Guid id)
+    {
+        _matches.TryGetValue(id, out var match);
+        return match;
+    }
+    public Match[] GetAllMatches()
+    {
+        return _matches.Values.ToArray();
     }
 }

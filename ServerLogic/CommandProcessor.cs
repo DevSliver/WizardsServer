@@ -1,88 +1,80 @@
-﻿using System;
+﻿namespace WizardsServer;
+
+using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Text;
-using NetCoreServer;
 
-namespace WizardsServer
+public class CommandProcessor
 {
-    public class CommandProcessor
+    private readonly Dictionary<string, Action<string[], Client>> _handlers = new();
+
+    public void Subscribe(string command, Action<string[], Client> handler)
     {
-        public static CommandProcessor Instance { get; } = new CommandProcessor();
+        if (!_handlers.ContainsKey(command))
+            _handlers[command] = delegate { };
 
-        private readonly Dictionary<string, Action<string[], Client>> _handlers = new();
+        _handlers[command] += handler;
+    }
 
-        private CommandProcessor() { }
+    public void Unsubscribe(string command, Action<string[], Client> handler)
+    {
+        if (_handlers.ContainsKey(command))
+            _handlers[command] -= handler;
+    }
 
-        public void Subscribe(string command, Action<string[], Client> handler)
+    public void ProcessCommand(string commandLine, Client client)
+    {
+        if (string.IsNullOrWhiteSpace(commandLine))
+            return;
+
+        var parts = SplitCommandLine(commandLine);
+
+        if (parts.Count == 0)
+            return;
+
+        string command = parts[0].ToLowerInvariant();
+        string[] args = parts.Count > 1 ? parts.GetRange(1, parts.Count - 1).ToArray() : Array.Empty<string>();
+
+        if (_handlers.TryGetValue(command, out var handlers))
         {
-            if (!_handlers.ContainsKey(command))
-                _handlers[command] = delegate { };
-
-            _handlers[command] += handler;
+            handlers.Invoke(args, client);
         }
+    }
+    public static List<string> SplitCommandLine(string commandLine)
+    {
+        var args = new List<string>();
+        var current = new StringBuilder();
+        bool insideBackticks = false;
 
-        public void Unsubscribe(string command, Action<string[], Client> handler)
+        for (int i = 0; i < commandLine.Length; i++)
         {
-            if (_handlers.ContainsKey(command))
-                _handlers[command] -= handler;
-        }
+            char c = commandLine[i];
 
-        public void ProcessCommand(string commandLine, Client client)
-        {
-            if (string.IsNullOrWhiteSpace(commandLine))
-                return;
-
-            var parts = SplitCommandLine(commandLine);
-
-            if (parts.Count == 0)
-                return;
-
-            string command = parts[0].ToLowerInvariant();
-            string[] args = parts.Count > 1 ? parts.GetRange(1, parts.Count - 1).ToArray() : Array.Empty<string>();
-
-            if (_handlers.TryGetValue(command, out var handlers))
+            if (c == '`')
             {
-                handlers.Invoke(args, client);
+                insideBackticks = !insideBackticks;
+                continue;
+            }
+
+            if (char.IsWhiteSpace(c) && !insideBackticks)
+            {
+                if (current.Length > 0)
+                {
+                    args.Add(current.ToString());
+                    current.Clear();
+                }
+            }
+            else
+            {
+                current.Append(c);
             }
         }
 
-        private List<string> SplitCommandLine(string commandLine)
+        if (current.Length > 0)
         {
-            var args = new List<string>();
-            var current = new StringBuilder();
-            bool insideBackticks = false;
-
-            for (int i = 0; i < commandLine.Length; i++)
-            {
-                char c = commandLine[i];
-
-                if (c == '`')
-                {
-                    insideBackticks = !insideBackticks;
-                    continue;
-                }
-
-                if (char.IsWhiteSpace(c) && !insideBackticks)
-                {
-                    if (current.Length > 0)
-                    {
-                        args.Add(current.ToString());
-                        current.Clear();
-                    }
-                }
-                else
-                {
-                    current.Append(c);
-                }
-            }
-
-            if (current.Length > 0)
-            {
-                args.Add(current.ToString());
-            }
-
-            return args;
+            args.Add(current.ToString());
         }
+
+        return args;
     }
 }
