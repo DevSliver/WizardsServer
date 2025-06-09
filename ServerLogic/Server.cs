@@ -81,7 +81,7 @@ public class Client
 
     public Match? Match { get; set; }
     public Player? Player { get; set; }
-    public bool InMatch { get; set; } = false;
+    public bool InMatch => Player != null;
 
     public Client(Session session)
     {
