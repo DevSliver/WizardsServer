@@ -122,9 +122,11 @@ public class Client : IDisposable
         var args = CommandProcessor.SplitCommandLine(command);
         CommandProcessor.Global.ProcessCommand(args, this);
     }
+    public int sends = 0;
     public bool SendAsync(string message)
     {
-        Console.WriteLine($"{Session.Id} - Отправлено сообщение: {message}");
+        sends++;
+        Console.WriteLine($"{Session.Id} - Отправлено сообщение {sends}: {message}");
         return Session.SendAsync(message);
     }
 
