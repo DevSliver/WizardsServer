@@ -39,6 +39,7 @@ public class Client
                     Server.Instance.Process(args, this);
                     break;
                 case "match":
+                    Console.WriteLine($"Попытка исполнения команды match. Player == null? = {Player == null}.");
                     Player?.Process(args, this);
                     break;
             }
