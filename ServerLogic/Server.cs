@@ -55,7 +55,7 @@ public class Server : TcpServer, ICommandProcessor
     private void OnSessionDisconnected(Session session)
     {
         MatchmakingService.CancelSearching(session.Client);
-        _clients[session].Match?.Disconnect(_clients[session].Player);
+        _clients[session].Player?.Match.Disconnect(_clients[session].Player);
         _clients.TryRemove(session, out _);
     }
     protected override void OnConnected(TcpSession tcpSession)
