@@ -16,6 +16,8 @@ public class Match
         Id = id;
         Player1 = new Player(client1, this, 1);
         Player2 = new Player(client2, this, 2);
+        Player1.Client.Player = Player1;
+        Player2.Client.Player = Player2;
     }
     public void NotifyPlayerLoaded(Player player)
     {
@@ -28,8 +30,6 @@ public class Match
     }
     private void StartMatch()
     {
-        Player1.Client.Player = Player1;
-        Player2.Client.Player = Player2;
         _battlefield = new Battlefield();
         _battlefield.PlaceUnit(new Permanent(Player1), new(0, 0));
         _battlefield.PlaceUnit(new Permanent(Player2), new(7, 7));
