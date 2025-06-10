@@ -4,8 +4,8 @@ namespace WizardsServer.ServerLogic;
 
 public class Client
 {
-    public int? UserId { get; set; }
-    public bool IsAuthenticated => UserId.HasValue;
+    public int UserId { get; set; } = -1;
+    public bool IsAuthenticated => UserId != -1;
     private Session _session;
     public Session Session => _session;
 
