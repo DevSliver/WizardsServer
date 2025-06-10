@@ -20,10 +20,6 @@ public class Client
     {
         _session = session;
     }
-    public void Authenticate(int userId)
-    {
-        UserId = userId;
-    }
     public void ReceiveCommand(long number, string[] args)
     {
         lock (_lock)
