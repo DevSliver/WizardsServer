@@ -7,8 +7,8 @@ public class Client
     public int? UserId { get; set; }
     public bool IsAuthenticated => UserId.HasValue;
     private Session _session;
+    public Session Session => _session;
 
-    public Match? Match { get; set; }
     public Player? Player { get; set; }
     public bool InMatch => Player != null;
 
@@ -52,10 +52,5 @@ public class Client
             Console.WriteLine($"{_session.Id} - Отправлено сообщение: {message}");
             return _session.SendAsync(message);
         }
-    }
-    public void SetMatchInfo(Match? match, Player? player)
-    {
-        Match = match;
-        Player = player;
     }
 }

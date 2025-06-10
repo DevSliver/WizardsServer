@@ -21,8 +21,8 @@ public class GameManager
         {
             Console.WriteLine($"Матч {id} удалён");
 
-            match.Player1.Client.SetMatchInfo(null, null);
-            match.Player2.Client.SetMatchInfo(null, null);
+            match.Player1.Client.Player = null;
+            match.Player2.Client.Player = null;
 
             return true;
         }

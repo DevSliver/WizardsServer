@@ -18,6 +18,7 @@ public class Player : ICommandProcessor
     }
     public void Process(string[] args, Client client)
     {
+        Console.WriteLine($"{client.Session.Id} - Process in Player");
         switch (args[0])
         {
             case "loaded":
