@@ -17,6 +17,10 @@ public static class CommandProcessor
         result = command.Length > 1 ? command[1..] : Array.Empty<string>();
         return command[0];
     }
+    public static string[] SplitMessage(string message)
+    {
+        return message.Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+    }
     public static string[] SplitCommandLine(string commandLine)
     {
         var args = new List<string>();

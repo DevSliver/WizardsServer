@@ -17,10 +17,14 @@ public class Session : TcpSession
         string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
         Console.WriteLine($"{Id} - Получено сообщение: {message}");
 
-        var args = CommandProcessor.SplitCommandLine(message);
-        if (args.Length == 0)
-            return;
-        Client.ReceiveCommand(long.Parse(args[0]), args[1..]);
+        var commands = CommandProcessor.SplitMessage(message);
+        foreach (var command in commands)
+        {
+            var args = CommandProcessor.SplitCommandLine(command);
+            if (args.Length == 0)
+                continue;
+            Client.ReceiveCommand(long.Parse(args[0]), args[1..]);
+        }
     }
     protected override void OnError(System.Net.Sockets.SocketError error)
     {
