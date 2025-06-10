@@ -1,9 +1,11 @@
-﻿namespace WizardsServer.Utils;
+﻿using WizardsServer.ServerLogic;
 
-public struct Vector2Int
+namespace WizardsServer.Utils;
+
+public struct Vector2Int : IEquatable<Vector2Int>
 {
-    public int X { get; }
-    public int Y { get; }
+    public int X;
+    public int Y;
 
     public Vector2Int(int x, int y)
     {
@@ -11,15 +13,16 @@ public struct Vector2Int
         Y = y;
     }
 
-    public override bool Equals(object obj)
-    {
-        if (obj is Vector2Int other)
-            return X == other.X && Y == other.Y;
-        return false;
-    }
+    public static Vector2Int Zero => new Vector2Int(0, 0);
+    public static Vector2Int One => new Vector2Int(1, 1);
 
+    public static Vector2Int operator +(Vector2Int a, Vector2Int b) => new Vector2Int(a.X + b.X, a.Y + b.Y);
+    public static Vector2Int operator -(Vector2Int a, Vector2Int b) => new Vector2Int(a.X - b.X, a.Y - b.Y);
+    public static bool operator ==(Vector2Int a, Vector2Int b) => a.X == b.X && a.Y == b.Y;
+    public static bool operator !=(Vector2Int a, Vector2Int b) => !(a == b);
+
+    public override bool Equals(object obj) => obj is Vector2Int other && this == other;
+    public bool Equals(Vector2Int other) => this == other;
     public override int GetHashCode() => (X, Y).GetHashCode();
-
-    public static bool operator ==(Vector2Int a, Vector2Int b) => a.Equals(b);
-    public static bool operator !=(Vector2Int a, Vector2Int b) => !a.Equals(b);
+    public override string ToString() => $"{X} {Y}";
 }

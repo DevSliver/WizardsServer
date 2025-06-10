@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using WizardsServer.ServerLogic;
 
 public class GameManager
 {
@@ -13,9 +14,6 @@ public class GameManager
         var match = new Match(id, client1, client2);
         _matches.TryAdd(id, match);
         Console.WriteLine($"Матч {id} создан");
-
-        client1.SendAsync($"matchmaking creating_match {id} 1");
-        client2.SendAsync($"matchmaking creating_match {id} 2");
     }
     public bool RemoveMatch(Guid id)
     {

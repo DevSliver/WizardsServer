@@ -1,19 +1,16 @@
 ﻿namespace WizardsServer;
 
 using System.Text.RegularExpressions;
+using WizardsServer.ServerLogic;
 
-public class NewsService
+public class NewsService : ICommandProcessor
 {
-    public NewsService()
+    public void Process(string[] args, Client client)
     {
-        Server.Instance.CommandProcessor.Subscribe("news", ProcessCommand);
-    }
-    private void ProcessCommand(string[] args, Client client)
-    {
-        switch (args[0])
+        switch (CommandProcessor.ProcessCommand(args, out args))
         {
             case "get":
-                GetNews(args[1..], client);
+                GetNews(args, client);
                 break;
         }
     }
@@ -46,7 +43,7 @@ public class NewsService
 
         cmd.Connection.Close();
 
-        client.SendAsync($"news success {title} {content} {date}");
+        client.SendAsync($"news get {title} {content} {date}");
     }
     private string WrapWithBackticks(string text)
     {

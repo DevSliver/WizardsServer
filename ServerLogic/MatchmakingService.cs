@@ -1,15 +1,13 @@
-﻿namespace WizardsServer;
+﻿using WizardsServer.ServerLogic;
 
-public class MatchmakingService
+namespace WizardsServer;
+
+public class MatchmakingService : ICommandProcessor
 {
     private readonly Queue<Client> waitingPlayers = new();
     private readonly HashSet<Client> waitingSet = new();
 
-    public MatchmakingService()
-    {
-        Server.Instance.CommandProcessor.Subscribe("matchmaking", ProcessCommand);
-    }
-    private void ProcessCommand(string[] args, Client client)
+    public void Process(string[] args, Client client)
     {
         switch (args[0])
         {
@@ -42,7 +40,7 @@ public class MatchmakingService
             waitingSet.Add(client);
         }
 
-        client.SendAsync("matchmaking waiting");
+        client.SendAsync("matchmaking status waiting");
         TryStartMatch();
     }
 
@@ -57,7 +55,7 @@ public class MatchmakingService
                 foreach (var player in newQueue)
                     waitingPlayers.Enqueue(player);
 
-                client.SendAsync("matchmaking cancelled");
+                client.SendAsync("matchmaking status cancelled");
             }
             else
             {
@@ -81,9 +79,10 @@ public class MatchmakingService
             }
         }
     }
-
-    private void StartMatch(Client player1, Client player2)
+    private void StartMatch(Client client1, Client client2)
     {
-        Server.Instance.GameManager.CreateMatch(player1, player2);
+        Server.Instance.GameManager.CreateMatch(client1, client2);
+        client1.SendAsync($"matchmaking match_found 1");
+        client2.SendAsync($"matchmaking match_found 2");
     }
 }

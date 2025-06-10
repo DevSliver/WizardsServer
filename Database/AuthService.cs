@@ -3,109 +3,104 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WizardsServer.ServerLogic;
 
-namespace WizardsServer
+namespace WizardsServer;
+
+public class AuthService : ICommandProcessor
 {
-    public class AuthService
+    public void Process(string[] args, Client client)
     {
-        public AuthService()
+        switch (CommandProcessor.ProcessCommand(args, out args))
         {
-            var processor = Server.Instance.CommandProcessor;
-            processor.Subscribe("auth", ProcessCommand);
+            case "register":
+                Register(args, client);
+                break;
+            case "login":
+                Login(args, client);
+                break;
         }
-        private void ProcessCommand(string[] args, Client client)
+    }
+    private void Register(string[] args, Client client)
+    {
+        if (args.Length != 2)
         {
-            switch (args[0])
-            {
-                case "register":
-                    Register(args[1..], client);
-                    break;
-                case "login":
-                    Login(args[1..], client);
-                    break;
-            }
+            client.SendAsync("auth register error usage");
+            return;
         }
-        private void Register(string[] args, Client client)
+
+        string username = args[0];
+        string password = args[1];
+
+        try
         {
-            if (args.Length != 2)
+            using var checkCmd = Database.CreateCommand("SELECT COUNT(*) FROM users WHERE username = @u");
+            checkCmd.Parameters.AddWithValue("u", username);
+            if (Convert.ToInt64(checkCmd.ExecuteScalar()) > 0)
             {
-                client.SendAsync("register error usage");
+                client.SendAsync("auth register error user_exists");
                 return;
             }
 
-            string username = args[0];
-            string password = args[1];
+            string hash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            try
-            {
-                using var checkCmd = Database.CreateCommand("SELECT COUNT(*) FROM users WHERE username = @u");
-                checkCmd.Parameters.AddWithValue("u", username);
-                if (Convert.ToInt64(checkCmd.ExecuteScalar()) > 0)
-                {
-                    client.SendAsync("register error user_exists");
-                    return;
-                }
+            using var cmd = Database.CreateCommand("INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id");
+            cmd.Parameters.AddWithValue("u", username);
+            cmd.Parameters.AddWithValue("p", hash);
+            var userId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                string hash = BCrypt.Net.BCrypt.HashPassword(password);
+            cmd.Connection.Close();
 
-                using var cmd = Database.CreateCommand("INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id");
-                cmd.Parameters.AddWithValue("u", username);
-                cmd.Parameters.AddWithValue("p", hash);
-                var userId = Convert.ToInt32(cmd.ExecuteScalar());
+            AuthenticateClient(client, userId);
+            client.SendAsync($"auth register success");
+        }
+        catch (Exception ex)
+        {
+            client.SendAsync($"auth register error unknown");
+        }
+    }
 
-                cmd.Connection.Close();
-
-                AuthenticateClient(client, userId);
-                client.SendAsync($"register success");
-            }
-            catch (Exception ex)
-            {
-                client.SendAsync($"register error unknown");
-            }
+    private void Login(string[] args, Client client)
+    {
+        if (args.Length != 2)
+        {
+            client.SendAsync("auth login error usage");
+            return;
         }
 
-        private void Login(string[] args, Client client)
+        string username = args[0];
+        string password = args[1];
+
+        try
         {
-            if (args.Length != 2)
+            using var cmd = Database.CreateCommand("SELECT id, password_hash FROM users WHERE username = @u");
+            cmd.Parameters.AddWithValue("u", username);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
             {
-                client.SendAsync("login error usage");
+                client.SendAsync("auth login error user_not_found");
                 return;
             }
 
-            string username = args[0];
-            string password = args[1];
-
-            try
+            if (!BCrypt.Net.BCrypt.Verify(password, reader.GetString(1)))
             {
-                using var cmd = Database.CreateCommand("SELECT id, password_hash FROM users WHERE username = @u");
-                cmd.Parameters.AddWithValue("u", username);
-
-                using var reader = cmd.ExecuteReader();
-                if (!reader.Read())
-                {
-                    client.SendAsync("login error user_not_found");
-                    return;
-                }
-
-                if (!BCrypt.Net.BCrypt.Verify(password, reader.GetString(1)))
-                {
-                    client.SendAsync("login error wrong_password");
-                    return;
-                }
-
-                int userId = reader.GetInt32(0);
-                AuthenticateClient(client, userId);
-                client.SendAsync($"login success");
+                client.SendAsync("auth login error wrong_password");
+                return;
             }
-            catch
-            {
-                client.SendAsync("login error unknown");
-            }
+
+            int userId = reader.GetInt32(0);
+            AuthenticateClient(client, userId);
+            client.SendAsync($"auth login success");
         }
-
-        private void AuthenticateClient(Client client, int userId)
+        catch
         {
-            client.Authenticate(userId);
+            client.SendAsync("auth login error unknown");
         }
+    }
+
+    private void AuthenticateClient(Client client, int userId)
+    {
+        client.Authenticate(userId);
     }
 }

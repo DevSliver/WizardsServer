@@ -1,45 +1,21 @@
-﻿namespace WizardsServer;
+﻿namespace WizardsServer.ServerLogic;
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
-public class CommandProcessor
+public static class CommandProcessor
 {
-    private static CommandProcessor _global = new CommandProcessor();
-    public static CommandProcessor Global => _global;
-
-    private readonly Dictionary<string, Action<string[], Client>> _handlers = new();
-
-    public void Subscribe(string command, Action<string[], Client> handler)
+    public static string? ProcessCommand(string[] command, out string[] result)
     {
-        if (!_handlers.ContainsKey(command))
-            _handlers[command] = delegate { };
-
-        _handlers[command] += handler;
-    }
-
-    public void Unsubscribe(string command, Action<string[], Client> handler)
-    {
-        if (_handlers.ContainsKey(command))
-            _handlers[command] -= handler;
-    }
-    public void ClearAllSubscriptions()
-    {
-        _handlers.Clear();
-    }
-    public void ProcessCommand(string[] commandArray, Client client)
-    {
-        if (commandArray == null || commandArray.Length == 0)
-            return;
-
-        string[] args = commandArray.Length > 1 ? commandArray[1..] : Array.Empty<string>();
-
-        if (_handlers.TryGetValue(commandArray[0], out var handlers))
+        if (command == null || command.Length == 0)
         {
-            handlers.Invoke(args, client);
+            result = Array.Empty<string>();
+            return null;
         }
+        
+        result = command.Length > 1 ? command[1..] : Array.Empty<string>();
+        return command[0];
     }
     public static string[] SplitCommandLine(string commandLine)
     {
@@ -78,4 +54,9 @@ public class CommandProcessor
 
         return args.ToArray();
     }
+}
+
+public interface ICommandProcessor
+{
+    void Process(string[] args, Client client);
 }
