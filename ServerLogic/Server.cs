@@ -54,7 +54,7 @@ public class Server : TcpServer, ICommandProcessor
     }
     private void OnClientDisconnected(TcpSession tcpSession)
     {
-        _clients[tcpSession].Player?.Disconnect()
+        _clients[tcpSession].Match?.Disconnect(_clients[tcpSession].Player);
         _clients.TryRemove(tcpSession, out _);
     }
     protected override void OnConnected(TcpSession tcpSession)

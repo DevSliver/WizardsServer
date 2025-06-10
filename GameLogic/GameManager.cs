@@ -20,6 +20,10 @@ public class GameManager
         if (_matches.TryRemove(id, out var match))
         {
             Console.WriteLine($"Матч {id} удалён");
+
+            match.Player1.Client.SetMatchInfo(null, null);
+            match.Player2.Client.SetMatchInfo(null, null);
+
             return true;
         }
 

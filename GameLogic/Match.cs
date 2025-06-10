@@ -1,4 +1,5 @@
-﻿using WizardsServer.ServerLogic;
+﻿using System.Numerics;
+using WizardsServer.ServerLogic;
 
 namespace WizardsServer.GameLogic;
 
@@ -41,5 +42,6 @@ public class Match
     public void Disconnect(Player player)
     {
         BroadcastAsync($"match disconnect {(player == Player1 ? 1 : 2)}");
+        Server.Instance.GameManager.RemoveMatch(Id);
     }
 }
