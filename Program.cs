@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using WizardsServer.ServerLogic;
 
 namespace WizardsServer;
 class Program
