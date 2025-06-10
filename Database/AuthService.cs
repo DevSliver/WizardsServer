@@ -96,7 +96,7 @@ public class AuthService : ICommandProcessor
 
     private void AuthenticateAndRespond(Client client, int userId, string operation)
     {
-        bool alreadyLoggedIn = Server.Instance.Clients.Values.Any(c => c.UserId == client.UserId);
+        bool alreadyLoggedIn = Server.Instance.Clients.Values.Any(c => c.IsAuthenticated && c.UserId == userId);
         if (alreadyLoggedIn)
         {
             client.SendAsync($"auth {operation} error alredy_logged_in");
