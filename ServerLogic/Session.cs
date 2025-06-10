@@ -1,4 +1,5 @@
 ﻿using NetCoreServer;
+using System.Diagnostics;
 using System.Text;
 
 namespace WizardsServer.ServerLogic;
@@ -15,11 +16,10 @@ public class Session : TcpSession
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
         string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-        Console.WriteLine($"{Id} - Получено сообщение: {message}");
-
         var commands = CommandProcessor.SplitMessage(message);
         foreach (var command in commands)
         {
+            Console.WriteLine($"Команда от сервера: {command}");
             var args = CommandProcessor.SplitCommandLine(command);
             if (args.Length == 0)
                 continue;
