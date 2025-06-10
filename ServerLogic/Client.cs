@@ -49,7 +49,7 @@ public class Client
     {
         lock (_lock)
         {
-            message = $"{_commandNumber++} {message}";
+            message = $"{_commandNumber++} {message}\0";
             Console.WriteLine($"{_session.Id} - Отправлено сообщение: {message}");
             return _session.SendAsync(message);
         }
