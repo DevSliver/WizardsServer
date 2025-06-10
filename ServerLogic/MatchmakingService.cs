@@ -9,18 +9,18 @@ public class MatchmakingService : ICommandProcessor
 
     public void Process(string[] args, Client client)
     {
-        switch (args[0])
+        switch (CommandProcessor.ProcessCommand(args, out args))
         {
             case "start_searching":
-                StartSearching(args[1..], client);
+                StartSearching(client);
                 break;
             case "cancel_searching":
-                CancelSearching(args[1..], client);
+                CancelSearching(client);
                 break;
         }
     }
 
-    private void StartSearching(string[] args, Client client)
+    private void StartSearching(Client client)
     {
         if (!client.IsAuthenticated)
         {
@@ -44,7 +44,7 @@ public class MatchmakingService : ICommandProcessor
         TryStartMatch();
     }
 
-    private void CancelSearching(string[] args, Client client)
+    public void CancelSearching(Client client)
     {
         lock (waitingPlayers)
         {

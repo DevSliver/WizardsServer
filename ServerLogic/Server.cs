@@ -45,17 +45,18 @@ public class Server : TcpServer, ICommandProcessor
     public void OnSessionError(TcpSession tcpSession, System.Net.Sockets.SocketError error)
     {
         Console.WriteLine($"Ошибка в сессии {tcpSession.Id}: {error}");
-        OnClientDisconnected(tcpSession);
+        OnSessionDisconnected((Session)tcpSession);
     }
     protected override void OnDisconnected(TcpSession tcpSession)
     {
         Console.WriteLine($"Сессия с ID {tcpSession.Id} отключена.");
-        OnClientDisconnected(tcpSession);
+        OnSessionDisconnected((Session)tcpSession);
     }
-    private void OnClientDisconnected(TcpSession tcpSession)
+    private void OnSessionDisconnected(Session session)
     {
-        _clients[tcpSession].Match?.Disconnect(_clients[tcpSession].Player);
-        _clients.TryRemove(tcpSession, out _);
+        MatchmakingService.CancelSearching(session.Client);
+        _clients[session].Match?.Disconnect(_clients[session].Player);
+        _clients.TryRemove(session, out _);
     }
     protected override void OnConnected(TcpSession tcpSession)
     {

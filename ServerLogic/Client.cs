@@ -15,6 +15,7 @@ public class Client
     private CommandQueue _commandQueue = new();
     private readonly object _lock = new();
     private long _commandNumber = 1;
+
     public Client(Session session)
     {
         _session = session;
