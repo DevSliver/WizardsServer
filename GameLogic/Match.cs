@@ -1,47 +1,49 @@
-﻿using System.Numerics;
-using WizardsServer.ServerLogic;
+﻿using WizardsServer.ServerLogic;
 
 namespace WizardsServer.GameLogic;
 
 public class Match
 {
     public Guid Id { get; }
-    public Player Player1 { get; }
-    public Player Player2 { get; }
+    public Player[] Players { get; }
     Battlefield _battlefield;
     public Battlefield Battlefield => _battlefield;
 
-    public Match(Guid id, Client client1, Client client2)
+    public Match(Guid id, params Client[] clients)
     {
         Id = id;
-        Player1 = new Player(client1, this, 1);
-        Player2 = new Player(client2, this, 2);
-        Player1.Client.Player = Player1;
-        Player2.Client.Player = Player2;
+        _battlefield = new Battlefield();
+        Players = new Player[clients.Length];
+        for (int i = 0; i < clients.Length; i++)
+        {
+            var newPlayer = new Player(clients[i], this, i);
+            Players[i] = newPlayer;
+            clients[i].Player = newPlayer;
+        }
     }
     public void NotifyPlayerLoaded(Player player)
     {
-        if (Player1.IsLoaded && Player2.IsLoaded)
-        {
-            Console.WriteLine($"Оба игрока загрузились (Матч ID: {Id})");
-            BroadcastAsync("match start");
-            StartMatch();
-        }
+        if (Players.Any(pl => pl.IsLoaded == false))
+            return;
+        Console.WriteLine($"Оба игрока загрузились (Матч ID: {Id})");
+        BroadcastAsync("match start");
+        StartMatch();
     }
     private void StartMatch()
     {
-        _battlefield = new Battlefield();
-        _battlefield.PlaceUnit(new Permanent(Player1), new(0, 0));
-        _battlefield.PlaceUnit(new Permanent(Player2), new(7, 7));
-    }
-    public void BroadcastAsync(string message)
-    {
-        Player1.Client.SendAsync(message);
-        Player2.Client.SendAsync(message);
+        _battlefield.PlacePermanent(new Permanent(Players[0]), new(0, 0));
+        _battlefield.PlacePermanent(new Permanent(Players[1]), new(7, 7));
     }
     public void Disconnect(Player player)
     {
-        BroadcastAsync($"match disconnect {(player == Player1 ? 1 : 2)}");
+        BroadcastAsync($"match disconnect {player.Id}");
         Server.Instance.GameManager.RemoveMatch(Id);
+    }
+    public void BroadcastAsync(string message)
+    {
+        foreach (var player in Players)
+        {
+            player.Client.SendAsync(message);
+        }
     }
 }

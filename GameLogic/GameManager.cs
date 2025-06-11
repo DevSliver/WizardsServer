@@ -21,8 +21,10 @@ public class GameManager
         {
             Console.WriteLine($"Матч {id} удалён");
 
-            match.Player1.Client.Player = null;
-            match.Player2.Client.Player = null;
+            foreach (var player in match.Players)
+            {
+                player.Client.Player = null;
+            }
 
             return true;
         }

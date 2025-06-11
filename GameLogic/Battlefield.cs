@@ -11,73 +11,75 @@ public class Battlefield : ICommandProcessor
     public const int Height = 8;
 
     private readonly Permanent?[,] _grid;
+    private int _nextPermanentId = 0;
 
     public Battlefield()
     {
         _grid = new Permanent[Width, Height];
     }
-    public bool PlaceUnit(Permanent unit, Vector2Int position)
+    public bool PlacePermanent(Permanent perm, Vector2Int position)
     {
         lock (_lock)
         {
-            if (!IsInBounds(position) || _grid[position.X, position.Y] != null)
+            if (!IsWithinBounds(position) || _grid[position.X, position.Y] != null)
                 return false;
 
-            unit.Position = position;
-            _grid[position.X, position.Y] = unit;
+            perm.Position = position;
+            perm.Id = _nextPermanentId++;
+            _grid[position.X, position.Y] = perm;
 
-            unit.Owner.Match.BroadcastAsync($"match battlefield place_unit {position}");
+            perm.Owner.Match.BroadcastAsync($"match battlefield place_permanent {perm.Id} {position} {perm.Owner.Id}");
             return true;
         }
     }
-    public void RemoveUnit(Vector2Int position)
+    public void RemovePermanent(Vector2Int position)
     {
         lock (_lock)
         {
-            if (!IsInBounds(position))
+            if (!IsWithinBounds(position))
                 return;
 
-            Permanent? unit = _grid[position.X, position.Y];
-            if (unit == null)
+            Permanent? perm = _grid[position.X, position.Y];
+            if (perm == null)
                 return;
             _grid[position.X, position.Y] = null;
-            unit.Owner.Match.BroadcastAsync($"match battlefield remove_unit {position}");
+            perm.Owner.Match.BroadcastAsync($"match battlefield remove_permanent {perm.Id}");
         }
     }
-    public void MoveUnit(Permanent unit, Vector2Int position)
+    public void MovePermanent(Permanent perm, Vector2Int position)
     {
         lock (_lock)
         {
-            if (unit == null)
+            if (perm == null)
                 return;
-            if (!unit.CanMoveOn(position, this))
+            if (!perm.CanMoveOn(position, this))
                 return;
 
-            Vector2Int oldPos = unit.Position;
-            unit.Position = position;
+            Vector2Int oldPos = perm.Position;
+            perm.Position = position;
 
             _grid[oldPos.X, oldPos.Y] = null;
-            _grid[position.X, position.Y] = unit;
+            _grid[position.X, position.Y] = perm;
 
-            unit.Owner.Match.BroadcastAsync($"match battlefield move_unit {oldPos} {position}");
+            perm.Owner.Match.BroadcastAsync($"match battlefield move_permanent {perm.Id} {position}");
         }
     }
-    public Permanent? GetUnitAt(Vector2Int position)
+    public Permanent? GetPermanentAt(Vector2Int position)
     {
         lock (_lock)
         {
-            return IsInBounds(position) ? _grid[position.X, position.Y] : null;
+            return IsWithinBounds(position) ? _grid[position.X, position.Y] : null;
         }
     }
-    public bool IsInBounds(Vector2Int pos) =>
+    public bool IsWithinBounds(Vector2Int pos) =>
         pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
 
     public void Process(string[] args, Client client)
     {
         switch (CommandProcessor.ProcessCommand(args, out args))
         {
-            case "move_unit":
-                MoveUnit(_grid[int.Parse(args[0]), int.Parse(args[1])], new Vector2Int(int.Parse(args[2]), int.Parse(args[3])));
+            case "move_permanent":
+                MovePermanent(_grid[int.Parse(args[0]), int.Parse(args[1])], new Vector2Int(int.Parse(args[2]), int.Parse(args[3])));
                 break;
         }
     }

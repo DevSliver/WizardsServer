@@ -6,6 +6,7 @@ public class Permanent
 {
     public Player Owner { get; }
     public Vector2Int Position { get; set; }
+    public int Id { get; set; }
 
     public Permanent(Player owner)
     {
@@ -27,8 +28,8 @@ public class Permanent
     }
     public bool CanMoveOn(Vector2Int position, Battlefield battlefield)
     {
-        if (!battlefield.IsInBounds(position)) return false;
-        if (battlefield.GetUnitAt(position) != null) return false;
+        if (!battlefield.IsWithinBounds(position)) return false;
+        if (battlefield.GetPermanentAt(position) != null) return false;
 
         return GetGlobalMovePattern().Contains(position);
     }

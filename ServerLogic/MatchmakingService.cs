@@ -82,7 +82,7 @@ public class MatchmakingService : ICommandProcessor
     private void StartMatch(Client client1, Client client2)
     {
         Server.Instance.GameManager.CreateMatch(client1, client2);
-        client1.SendAsync($"matchmaking match_found 1");
-        client2.SendAsync($"matchmaking match_found 2");
+        client1.SendAsync($"matchmaking match_found 0 2");
+        client2.SendAsync($"matchmaking match_found 1 2");
     }
 }
