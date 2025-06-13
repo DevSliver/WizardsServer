@@ -1,12 +1,13 @@
-﻿using WizardsServer.Utils;
+﻿using MessagePack;
+using WizardsServer.Utils;
 
 namespace WizardsServer.GameLogic;
 
 public class Permanent
 {
     public Player Owner { get; }
-    public Vector2Int Position { get; set; }
-    public int Id { get; set; }
+    public Vector2Int Position = new();
+    public readonly Guid Id = Guid.NewGuid();
 
     public Permanent(Player owner)
     {

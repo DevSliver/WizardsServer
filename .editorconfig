@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0022: Использовать тело блока для метода
+dotnet_diagnostic.IDE0022.severity = none
+
+# CS0809: Устаревший член переопределяет неустаревший член
+dotnet_diagnostic.CS0809.severity = none

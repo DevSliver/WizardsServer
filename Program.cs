@@ -1,18 +1,22 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using WizardsServer.ServerLogic;
+using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer;
 class Program
 {
+    // Очередь для передачи действий в главный поток
+    private static readonly ConcurrentQueue<Action> _mainThreadActions = new();
+    private static readonly AutoResetEvent _newActionEvent = new(false);
+
     static async Task Main(string[] args)
     {
-        // Настройка сервера и запуск.
         var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
         var server = new Server(IPAddress.Any, Convert.ToInt32(port));
         server.Start();
         Console.WriteLine($"Сервер запущен на порту {port}.");
 
-        // Настройка базы данных и подключение.
         string connectionString = $"Host={Environment.GetEnvironmentVariable("PGHOST")};" +
                        $"Port={Environment.GetEnvironmentVariable("PGPORT")};" +
                        $"Username={Environment.GetEnvironmentVariable("PGUSER")};" +
@@ -20,7 +24,30 @@ class Program
                        $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};";
         Database.Initialize(connectionString);
 
-        // Сервер не отключается сам.
-        await Task.Delay(-1);
+        await RunMainLoop();
+    }
+    public static void EnqueueMainThreadAction(Action action)
+    {
+        _mainThreadActions.Enqueue(action);
+        _newActionEvent.Set();
+    }
+    private static async Task RunMainLoop()
+    {
+        while (true)
+        {
+            _newActionEvent.WaitOne(50);
+            while (_mainThreadActions.TryDequeue(out var action))
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка при выполнении действия: {ex}");
+                }
+            }
+            await Task.Yield();
+        }
     }
 }

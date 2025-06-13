@@ -5,7 +5,7 @@ using System;
 
 public static class Database
 {
-    private static string _connectionString;
+    private static string _connectionString = "";
 
     public static void Initialize(string connectionString)
     {

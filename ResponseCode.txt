@@ -1,0 +1,22 @@
+xyyy, where x:
+1 Success response
+2 System errors
+3 Client errors
+4 Server errors
+
+1000 Success
+
+2000 Unknown error
+2001 Unknown command
+2002 Command deserialize error
+2003 Error in arguments
+
+3001 Already in matchmaking queue
+3002 Not in matchmaking queue
+
+4001 Database Error
+4002 (register) User exists
+4003 (login) User not found
+4004 (login) Incorrect password
+4005 (auth) User already have active client
+4006 Record not found in DB

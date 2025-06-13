@@ -1,32 +1,33 @@
 ﻿using WizardsServer.ServerLogic;
+using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer.GameLogic;
 
-public class Match
+public class Match : IDisposable
 {
     public Guid Id { get; }
     public Player[] Players { get; }
     Battlefield _battlefield;
     public Battlefield Battlefield => _battlefield;
 
-    public Match(Guid id, params Client[] clients)
+    public Match(Guid id, params Session[] sessions)
     {
         Id = id;
-        _battlefield = new Battlefield();
-        Players = new Player[clients.Length];
-        for (int i = 0; i < clients.Length; i++)
+        _battlefield = new Battlefield(this);
+        Players = new Player[sessions.Length];
+        for (int i = 0; i < sessions.Length; i++)
         {
-            var newPlayer = new Player(clients[i], this, i);
+            var newPlayer = new Player(sessions[i], this, i);
             Players[i] = newPlayer;
-            clients[i].Player = newPlayer;
+            sessions[i].TrySetPlayer(newPlayer);
         }
     }
-    public void NotifyPlayerLoaded(Player player)
+    public void PlayerLoaded(Player player)
     {
         if (Players.Any(pl => pl.IsLoaded == false))
             return;
-        Console.WriteLine($"Оба игрока загрузились (Матч ID: {Id})");
-        BroadcastAsync("match start");
+        Console.WriteLine($"Все игроки загрузились в матч {Id}");
+        Broadcast(new Command("Match.Start"));
         StartMatch();
     }
     private void StartMatch()
@@ -36,14 +37,25 @@ public class Match
     }
     public void Disconnect(Player player)
     {
-        BroadcastAsync($"match disconnect {player.Id}");
+        Command com = new("Match.End");
+        com.Args.Add("Reason", "disconnect");
+        com.Args.Add("Loser", player.Number);
+        Broadcast(com);
         Server.Instance.GameManager.RemoveMatch(Id);
     }
-    public void BroadcastAsync(string message)
+    public void Broadcast(Command command)
     {
         foreach (var player in Players)
         {
-            player.Client.SendAsync(message);
+            player.Session.Send(command);
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var player in Players)
+        {
+            player.Session.TrySetPlayer(null);
         }
     }
 }

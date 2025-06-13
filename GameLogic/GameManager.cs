@@ -1,44 +1,36 @@
 ﻿namespace WizardsServer.GameLogic;
 
 using System;
-using System.Collections.Concurrent;
 using WizardsServer.ServerLogic;
 
 public class GameManager
 {
-    private readonly ConcurrentDictionary<Guid, Match> _matches = new();
+    private readonly object _lock = new();
+    private readonly Dictionary<Guid, Match> _matches = new();
 
-    public void CreateMatch(Client client1, Client client2)
+    public void CreateMatch(Session session1, Session session2)
     {
-        var id = Guid.NewGuid();
-        var match = new Match(id, client1, client2);
-        _matches.TryAdd(id, match);
-        Console.WriteLine($"Матч {id} создан");
+        lock (_lock)
+        {
+            var id = Guid.NewGuid();
+            var match = new Match(id, session1, session2);
+            _matches[id] = match;
+            Console.WriteLine($"Матч {id} создан");
+        }
     }
     public bool RemoveMatch(Guid id)
     {
-        if (_matches.TryRemove(id, out var match))
+        lock (_lock)
         {
-            Console.WriteLine($"Матч {id} удалён");
-
-            foreach (var player in match.Players)
+            if (!_matches.Remove(id, out var match))
             {
-                player.Client.Player = null;
+                Console.WriteLine($"Матч {id} не найден для удаления");
+                return false;
             }
 
+            match.Dispose();
+            Console.WriteLine($"Матч {id} удалён");
             return true;
         }
-
-        Console.WriteLine($"Матч {id} не найден для удаления");
-        return false;
-    }
-    public Match? GetMatch(Guid id)
-    {
-        _matches.TryGetValue(id, out var match);
-        return match;
-    }
-    public Match[] GetAllMatches()
-    {
-        return _matches.Values.ToArray();
     }
 }

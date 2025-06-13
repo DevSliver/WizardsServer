@@ -1,36 +1,28 @@
 ﻿using WizardsServer.ServerLogic;
+using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer.GameLogic;
 
-public class Player : ICommandProcessor
+public class Player
 {
-    public Client Client { get; }
+    public Session Session { get; }
     public Match Match { get; }
-    public int Id { get; }
-    public bool IsLoaded { get; private set; }
+    public int Number { get; }
+    public bool IsLoaded { get; private set; } = false;
 
-    public Player(Client client, Match match, int id)
+    public Player(Session session, Match match, int number)
     {
-        Client = client;
+        Session = session;
         Match = match;
-        Id = id;
-        IsLoaded = false;
+        Number = number;
     }
-    public void Process(string[] args, Client client)
+    public void Loaded()
     {
-        Console.WriteLine($"{client.Session.Id} - Process in Player");
-        switch (args[0])
-        {
-            case "loaded":
-                IsLoaded = true;
-                Match.NotifyPlayerLoaded(this);
-                break;
-            case "battlefield":
-                Match.Battlefield.Process(args, client);
-                break;
-            case "disconnect":
-                Match.Disconnect(this);
-                break;
-        }
+        IsLoaded = true;
+        Match.PlayerLoaded(this);
+    }
+    public void Disconnect(Command command)
+    {
+        Match.Disconnect(this);
     }
 }
