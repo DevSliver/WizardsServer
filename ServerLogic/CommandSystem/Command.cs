@@ -56,4 +56,13 @@ public class Command
         response.Args.Add("Id", command.Id).Add(args);
         return response;
     }
+    public override string ToString()
+    {
+        string str = $"Id: {Id.ToString()}; Path: {Path}; Agrs<Type, Key, Value.ToString()>: ";
+        foreach (var kvp in Args.ArgsDict)
+        {
+            str += $"<<{kvp.Value.GetType().ToString()}; {kvp.Key}; {kvp.Value.ToString()}>>; ";
+        }
+        return str;
+    }
 }

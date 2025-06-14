@@ -13,7 +13,10 @@ using MessagePack;
 [Union(7, typeof(Arg<List<string>>))]
 [Union(8, typeof(Arg<List<bool>>))]
 [Union(9, typeof(Arg<List<Guid>>))]
-public interface IArg { }
+public interface IArg
+{
+    string ToString();
+}
 [MessagePackObject]
 public struct Arg<T> : IArg
 {
@@ -23,6 +26,7 @@ public struct Arg<T> : IArg
     {
         Value = value;
     }
+    public new void ToString() => Value.ToString();
 }
 [MessagePackObject(AllowPrivate = true)]
 public partial class Args

@@ -1,5 +1,6 @@
 ﻿using NetCoreServer;
 using Npgsql;
+using System.Diagnostics;
 using WizardsServer.GameLogic;
 using WizardsServer.ServerLogic.CommandSystem;
 using WizardsServer.services;
@@ -115,7 +116,7 @@ public class Session : TcpSession
         try
         {
             var command = CommandProcessor.Deserialize(message);
-            Console.WriteLine($"{Id} - Получена команда {command.Id}. Путь: \"{command.Path}\".");
+            Console.WriteLine($"Получена команда.\n{command.ToString()}");
             Program.EnqueueMainThreadAction(() =>
             {
                 try
