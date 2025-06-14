@@ -2,20 +2,20 @@
 
 namespace WizardsServer.ServerLogic.CommandSystem;
 
-[MessagePackObject(AllowPrivate = true)]
-public partial class Command
+[MessagePackObject]
+public class Command
 {
-    [IgnoreMember]
-    public readonly Guid Id;
     [Key(0)]
-    public readonly string Path;
+    public readonly Guid Id;
     [Key(1)]
+    public readonly string Path;
+    [Key(2)]
     public readonly Args Args;
 
     [SerializationConstructor]
-    public Command(string path, Args args)
+    public Command(Guid id, string path, Args args)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Path = RemoveTrailingSlash(path);
         Args = args;
     }
@@ -47,15 +47,13 @@ public partial class Command
     public static Command MsgResponse(Command command, string message)
     {
         Command response = new Command("Response.Command");
-        response.Args.Add("Message", message);
-        response.Args.Add("Id", command.Id);
-        response.Args.Add("Path", command.Path);
+        response.Args.Add("Message", message).Add("Id", command.Id);
         return response;
     }
     public static Command Response(Command command, Args args)
     {
         Command response = new Command("Response.Command");
-        response.Args.Add("Id", command.Id).Add("Path", command.Path).Add(args);
+        response.Args.Add("Id", command.Id).Add(args);
         return response;
     }
 }

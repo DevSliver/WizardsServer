@@ -1,6 +1,6 @@
-﻿using WizardsServer.ServerLogic;
+﻿using UnityEngine;
+using WizardsServer.ServerLogic;
 using WizardsServer.ServerLogic.CommandSystem;
-using WizardsServer.Utils;
 
 namespace WizardsServer.GameLogic;
 
@@ -19,14 +19,14 @@ public class Battlefield
     }
     public bool PlacePermanent(Permanent perm, Vector2Int position)
     {
-        if (!IsWithinBounds(position) || _grid[position.X, position.Y] != null)
+        if (!IsWithinBounds(position) || _grid[position.x, position.y] != null)
             return false;
 
         perm.Position = position;
-        _grid[position.X, position.Y] = perm;
+        _grid[position.x, position.y] = perm;
 
         Command com = new("Match.PlacePermanent");
-        com.Args.Add("x", position.X).Add("Y", position.Y).Add("Owner", perm.Owner.Number);
+        com.Args.Add("x", position.x).Add("Y", position.y).Add("Owner", perm.Owner.Number);
         _match.Broadcast(com);
         return true;
     }
@@ -35,10 +35,10 @@ public class Battlefield
         if (!IsWithinBounds(position))
             return;
 
-        Permanent? perm = _grid[position.X, position.Y];
+        Permanent? perm = _grid[position.x, position.y];
         if (perm == null)
             return;
-        _grid[position.X, position.Y] = null;
+        _grid[position.x, position.y] = null;
         //perm.Owner.Match.BroadcastAsync($"match battlefield remove_permanent {perm.Id}");
     }
     public void MovePermanent(Permanent perm, Vector2Int position)
@@ -51,15 +51,15 @@ public class Battlefield
         Vector2Int oldPos = perm.Position;
         perm.Position = position;
 
-        _grid[oldPos.X, oldPos.Y] = null;
-        _grid[position.X, position.Y] = perm;
+        _grid[oldPos.x, oldPos.y] = null;
+        _grid[position.x, position.y] = perm;
 
         //perm.Owner.Match.BroadcastAsync($"match battlefield move_permanent {perm.Id} {position}");
     }
     public Permanent? GetPermanentAt(Vector2Int position)
     {
-        return IsWithinBounds(position) ? _grid[position.X, position.Y] : null;
+        return IsWithinBounds(position) ? _grid[position.x, position.y] : null;
     }
     public bool IsWithinBounds(Vector2Int pos) =>
-        pos.X >= 0 && pos.X < Width && pos.Y >= 0 && pos.Y < Height;
+        pos.x >= 0 && pos.x < Width && pos.y >= 0 && pos.y < Height;
 }

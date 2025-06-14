@@ -1,5 +1,5 @@
 ﻿using MessagePack;
-using WizardsServer.Utils;
+using UnityEngine;
 
 namespace WizardsServer.GameLogic;
 
@@ -22,7 +22,7 @@ public class Permanent
 
         for (int i = 0; i < relative.Count; i++)
         {
-            global.Add(relative[i] + Position);
+            global.Add(relative[i].Add(Position));
         }
 
         return global;

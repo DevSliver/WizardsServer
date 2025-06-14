@@ -125,7 +125,7 @@ public class Session : TcpSession
                 catch (Exception ex)
                 {
                     Console.WriteLine($"{Id} - Ошибка выполнения команды {command.Id}. Путь: \"{command.Path}\":");
-                    Console.WriteLine(ex);
+                    Console.WriteLine(ex.ToString());
                 }
             });
         }
@@ -134,7 +134,7 @@ public class Session : TcpSession
             Console.WriteLine($"{Id} - Ошибка десериализации команды:");
             Console.WriteLine(ex.ToString());
 
-            Command command = new Command("Error/Deserialization");
+            Command command = new Command("Response.Deserialization");
             Send(command);
         }
     }
