@@ -74,6 +74,7 @@ public class Session : TcpSession
         if (!IsAuthed)
         {
             UserId = userId;
+            AuthCommands();
             Server.AuthUser(this, userId);
         }
     }
