@@ -53,25 +53,11 @@ public class Command
     public static Command Response(Command command, Args args)
     {
         Command response = new Command("Response.Command");
-        response.Args.Add("Id", command.Id).AddArgs(args);
+        response.Args.Add("Id", command.Id).Add(args);
         return response;
     }
     public override string ToString()
     {
-        string str = $"Id: {Id.ToString()}; Path: {Path}; Agrs<Type, Key, Value.ToString()>: ";
-        foreach (var kvp in Args.ArgsDict)
-        {
-            string key = "null";
-            string type = "null";
-            string value = "null";
-            if (kvp.Key != null) key = kvp.Key;
-            if (kvp.Value != null)
-            {
-                type = kvp.Value.GetType().ToString();
-                value = kvp.Value.ToSomeString();
-            }
-            str += $"<<{type}; {key}; {value}>>; ";
-        }
-        return str;
+        return $"Id: {Id.ToString()}; Path: {Path}; Agrs<[Type], [Key], [Value.ToString()]>: {Args.ToString()}";
     }
 }

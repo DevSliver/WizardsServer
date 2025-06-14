@@ -71,13 +71,31 @@ public partial class Args
         _args[key] = new Arg<T>(value);
         return this;
     }
-    public Args AddArgs(Args newArgs)
+    public Args Add(Args newArgs)
     {
         var newArgsDict = newArgs.ArgsDict;
         foreach(var kvp in newArgsDict)
-            Add(kvp.Key, kvp.Value);
+            _args[kvp.Key] = kvp.Value;
         return this;
     }
     public Args AddResponse(Command responseTo, Args responseArgs) =>
-        Add("Id", responseTo.Id).Add("Path", responseTo.Path).AddArgs(responseArgs);
+        Add("Id", responseTo.Id).Add("Path", responseTo.Path).Add(responseArgs);
+    public override string ToString()
+    {
+        string str = "";
+        foreach (var kvp in _args)
+        {
+            string key = "[null]";
+            string type = "[null]";
+            string value = "[null]";
+            if (kvp.Key != null) key = kvp.Key;
+            if (kvp.Value != null)
+            {
+                type = kvp.Value.GetType().ToString();
+                value = kvp.Value.ToSomeString();
+            }
+            str += $"<<{type}; {key}; {value}>>; ";
+        }
+        return str;
+    }
 }
