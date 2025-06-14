@@ -103,7 +103,7 @@ public class Session : TcpSession
             BitConverter.GetBytes(length).CopyTo(message, 0);
             payload.CopyTo(message, 4);
             base.SendAsync(message);
-            Console.WriteLine($"{Id} - Отправлена команда {command.Id}. Путь: \"{command.Path}\".");
+            Console.WriteLine($"Отправлена команда.\n{command.ToString()}");
         }
         catch (Exception ex)
         {
