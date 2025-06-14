@@ -61,7 +61,16 @@ public class Command
         string str = $"Id: {Id.ToString()}; Path: {Path}; Agrs<Type, Key, Value.ToString()>: ";
         foreach (var kvp in Args.ArgsDict)
         {
-            str += $"<<{kvp.Value.GetType().ToString()}; {kvp.Key}; {kvp.Value.ToString()}>>; ";
+            string key = "null";
+            string type = "null";
+            string value = "null";
+            if (kvp.Key != null) key = kvp.Key;
+            if (kvp.Value != null)
+            {
+                type = kvp.Value.GetType().ToString();
+                value = kvp.Value.ToString();
+            }
+            str += $"<<{type}; {key}; {value}>>; ";
         }
         return str;
     }
