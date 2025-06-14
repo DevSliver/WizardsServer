@@ -41,14 +41,9 @@ public class Server : TcpServer
     public void AuthUser(Session session, int userId)
     {
         if (!session.IsAuthed)
-        {
             session.Auth(userId);
-            return;
-        }
-        lock (_lock)
-        {
-            _authedSessions.TryAdd(userId, session);
-        }
+        else
+            _authedSessions[userId] = session;
     }
     protected override TcpSession CreateSession()
     {

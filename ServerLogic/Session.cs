@@ -72,10 +72,10 @@ public class Session : TcpSession
     public void Auth(int userId)
     {
         if (!IsAuthed)
-            return;
-        UserId = userId;
-        Server.AuthUser(this, userId);
-        AuthCommands();
+        {
+            UserId = userId;
+            Server.AuthUser(this, userId);
+        }
     }
     public bool TrySetPlayer(Player? player)
     {
