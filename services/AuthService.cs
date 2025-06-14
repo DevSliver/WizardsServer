@@ -20,10 +20,8 @@ public class AuthService
         cmd.Parameters.AddWithValue("p", hash);
 
         int userId = Convert.ToInt32(cmd.ExecuteScalar());
-        if (Server.Instance.IsUserAuthed(userId))
-            return new Args().Add("Message", "user already authed");
 
-        session.Auth(userId);
+        Server.Instance.AuthUser(session, userId);
         return new Args().Add("Message", "success");
     }
 
@@ -44,7 +42,7 @@ public class AuthService
         if (Server.Instance.IsUserAuthed(userId))
             return new Args().Add("Message", "user already authed");
 
-        session.Auth(userId);
+        Server.Instance.AuthUser(session, userId);
         return new Args().Add("Message", "success");
     }
 }
