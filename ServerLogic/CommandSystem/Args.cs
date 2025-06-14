@@ -71,7 +71,7 @@ public partial class Args
         _args[key] = new Arg<T>(value);
         return this;
     }
-    public Args Add(Args newArgs)
+    public Args AddArgs(Args newArgs)
     {
         var newArgsDict = newArgs.ArgsDict;
         foreach(var kvp in newArgsDict)
@@ -79,5 +79,5 @@ public partial class Args
         return this;
     }
     public Args AddResponse(Command responseTo, Args responseArgs) =>
-        Add("Id", responseTo.Id).Add("Path", responseTo.Path).Add(responseArgs);
+        Add("Id", responseTo.Id).Add("Path", responseTo.Path).AddArgs(responseArgs);
 }

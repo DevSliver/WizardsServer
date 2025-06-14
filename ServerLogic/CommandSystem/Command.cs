@@ -53,7 +53,7 @@ public class Command
     public static Command Response(Command command, Args args)
     {
         Command response = new Command("Response.Command");
-        response.Args.Add("Id", command.Id).Add(args);
+        response.Args.Add("Id", command.Id).AddArgs(args);
         return response;
     }
     public override string ToString()
