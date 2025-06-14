@@ -58,6 +58,6 @@ public class Command
     }
     public override string ToString()
     {
-        return $"Id: {Id.ToString()}; Path: {Path}; Agrs<[Type], [Key], [Value.ToString()]>: {Args.ToString()}";
+        return $"Id: {Id.ToString()}; Path: {Path}; Agrs<[Key], [Value.ToString()]>: {Args.ToString()}";
     }
 }

@@ -74,6 +74,7 @@ public partial class Args
     public Args Add(Args newArgs)
     {
         var newArgsDict = newArgs.ArgsDict;
+        // don't use Add<T> here! Because Add<T> creates new Arg.
         foreach(var kvp in newArgsDict)
             _args[kvp.Key] = kvp.Value;
         return this;
@@ -86,15 +87,10 @@ public partial class Args
         foreach (var kvp in _args)
         {
             string key = "[null]";
-            string type = "[null]";
             string value = "[null]";
             if (kvp.Key != null) key = kvp.Key;
-            if (kvp.Value != null)
-            {
-                type = kvp.Value.GetType().ToString();
-                value = kvp.Value.ToSomeString();
-            }
-            str += $"<<{type}; {key}; {value}>>; ";
+            if (kvp.Value != null) value = kvp.Value.ToSomeString();
+            str += $"<<{key}; {value}>>; ";
         }
         return str;
     }
