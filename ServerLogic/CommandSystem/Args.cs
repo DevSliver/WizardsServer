@@ -89,7 +89,7 @@ public partial class Args
             string key = "[null]";
             string value = "[null]";
             if (kvp.Key != null) key = kvp.Key;
-            if (kvp.Value != null) value = kvp.Value.ToSomeString();
+            if (kvp.Value != null) value = kvp.Value.ToString();
             str += $"<<{key}; {value}>>; ";
         }
         return str;
