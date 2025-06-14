@@ -15,7 +15,7 @@ using MessagePack;
 [Union(9, typeof(Arg<List<Guid>>))]
 public interface IArg
 {
-    string ToString();
+    string ToSomeString();
 }
 [MessagePackObject]
 public struct Arg<T> : IArg
@@ -26,7 +26,7 @@ public struct Arg<T> : IArg
     {
         Value = value;
     }
-    public new void ToString() => Value.ToString();
+    public string ToSomeString() => Value.ToString();
 }
 [MessagePackObject(AllowPrivate = true)]
 public partial class Args
