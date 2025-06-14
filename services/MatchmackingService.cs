@@ -26,6 +26,8 @@ public class MatchmackingService
     }
     private void TryStartMatch()
     {
+        if (waitingPlayers.Count < 2)
+            return;
         var player1 = waitingPlayers.First();
         waitingPlayers.Remove(player1);
         var player2 = waitingPlayers.First();
