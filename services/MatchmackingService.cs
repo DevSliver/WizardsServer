@@ -36,6 +36,8 @@ public class MatchmackingService
     {
         Server.Instance.GameManager.CreateMatch(session1, session2);
         Command start = new Command("Matchmacking.StartMatch");
+        start.Args.Add("Count", 2);
+
         start.Args.Add("Number", 1);
         session1.Send(start);
         start.Args.Add("Number", 2);

@@ -35,26 +35,26 @@ public class Session : TcpSession
     {
         _processor["AuthService.Login"] = (s, c) =>
         {
-            if (!c.Args.TryGet("Username", out string username) ||
-            !c.Args.TryGet("Password", out string password))
-                Send(Command.MsgResponse(c, "usage"));
-            else
+            if (c.Args.TryGet("Username", out string username) &&
+            c.Args.TryGet("Password", out string password))
                 Send(Command.Response(c, Server.AuthService.Login(s, username, password)));
+            else
+                Send(Command.MsgResponse(c, "usage"));
         };
         _processor["AuthService.Register"] = (s, c) =>
         {
-            if (!c.Args.TryGet("Username", out string username) ||
-            !c.Args.TryGet("Password", out string password))
-                Send(Command.MsgResponse(c, "usage"));
-            else
+            if (c.Args.TryGet("Username", out string username) &&
+            c.Args.TryGet("Password", out string password))
                 Send(Command.Response(c, Server.AuthService.Register(s, username, password)));
+            else
+                Send(Command.MsgResponse(c, "usage"));
         };
         _processor["NewsService.Get"] = (s, c) =>
         {
-            if (!c.Args.TryGet("Number", out int number))
-                Send(Command.MsgResponse(c, "usage"));
-            else
+            if (c.Args.TryGet("Number", out int number))
                 Send(Command.Response(c, Server.NewsService.Get(number)));
+            else
+                Send(Command.MsgResponse(c, "usage"));
         };
     }
     private void PlayerCommands()
