@@ -103,7 +103,7 @@ public class Session : TcpSession
             BitConverter.GetBytes(length).CopyTo(message, 0);
             payload.CopyTo(message, 4);
             base.SendAsync(message);
-            Console.WriteLine($"Отправлена команда.\n{command.ToSomeString()}");
+            Console.WriteLine($"Отправлена команда.\n{command.ToString()}");
         }
         catch (Exception ex)
         {
@@ -116,7 +116,7 @@ public class Session : TcpSession
         try
         {
             var command = CommandProcessor.Deserialize(message);
-            Console.WriteLine($"Получена команда.\n{command.ToSomeString()}");
+            Console.WriteLine($"Получена команда.\n{command.ToString()}");
             Program.EnqueueMainThreadAction(() =>
             {
                 try
