@@ -3,7 +3,7 @@ using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer.services;
 
-public class MatchmackingService
+internal class MatchmackingService
 {
     private readonly HashSet<Session> waitingPlayers = new();
 

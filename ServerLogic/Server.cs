@@ -1,13 +1,11 @@
 ﻿namespace WizardsServer.ServerLogic;
 
 using NetCoreServer;
-using System.Collections.Concurrent;
 using System.Net;
-using WizardsServer.GameLogic;
 using WizardsServer.ServerLogic.CommandSystem;
 using WizardsServer.services;
 
-public class Server : TcpServer
+internal class Server : TcpServer
 {
     private static Server? _instance;
     public static Server Instance => _instance ?? throw new InvalidOperationException("Server is not initialized");
@@ -59,7 +57,7 @@ public class Server : TcpServer
         lock (_lock)
         {
             MatchmakingService.CancelSearching(session);
-            session.Player?.Match.Disconnect(session.Player);
+            session.Player?.Disconnect();
             _authedSessions.Remove(session.UserId);
             _sessions.Remove(session);
             Console.WriteLine($"{session.Id} - Сессия отключена.");

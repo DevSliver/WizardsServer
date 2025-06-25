@@ -1,18 +1,20 @@
 ﻿namespace WizardsServer.ServerLogic.CommandSystem;
 
 using MessagePack;
+using UnityEngine;
 
 [Union(0, typeof(Arg<int>))]
-[Union(1, typeof(Arg<float>))]
-[Union(2, typeof(Arg<string>))]
-[Union(3, typeof(Arg<bool>))]
-[Union(4, typeof(Arg<Guid>))]
-
-[Union(5, typeof(Arg<List<int>>))]
-[Union(6, typeof(Arg<List<float>>))]
-[Union(7, typeof(Arg<List<string>>))]
-[Union(8, typeof(Arg<List<bool>>))]
+[Union(1, typeof(Arg<List<int>>))]
+[Union(2, typeof(Arg<float>))]
+[Union(3, typeof(Arg<List<float>>))]
+[Union(4, typeof(Arg<string>))]
+[Union(5, typeof(Arg<List<string>>))]
+[Union(6, typeof(Arg<bool>))]
+[Union(7, typeof(Arg<List<bool>>))]
+[Union(8, typeof(Arg<Guid>))]
 [Union(9, typeof(Arg<List<Guid>>))]
+[Union(10, typeof(Arg<Vector2Int>))]
+[Union(11, typeof(Arg<List<Vector2Int>>))]
 public interface IArg
 {
     string ToString();

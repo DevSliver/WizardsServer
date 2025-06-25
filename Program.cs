@@ -4,7 +4,7 @@ using WizardsServer.ServerLogic;
 using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer;
-class Program
+internal class Program
 {
     // Очередь для передачи действий в главный поток
     private static readonly ConcurrentQueue<Action> _mainThreadActions = new();

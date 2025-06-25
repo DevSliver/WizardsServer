@@ -3,7 +3,7 @@ using WizardsServer.ServerLogic.CommandSystem;
 
 namespace WizardsServer.services;
 
-public class AuthService
+internal class AuthService
 {
     public Args Register(Session session, string username, string password)
     {

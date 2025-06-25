@@ -2,7 +2,7 @@
 
 namespace WizardsServer.ServerLogic.CommandSystem;
 
-public class CommandProcessor
+internal class CommandProcessor
 {
     private readonly Dictionary<string, Action<Session, Command>> _handlers = new();
     public Action<Session, Command> this[string key]

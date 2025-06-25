@@ -2,7 +2,7 @@
 
 using WizardsServer.ServerLogic.CommandSystem;
 
-public class NewsService
+internal class NewsService
 {
     public Args Get(int number)
     {

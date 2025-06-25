@@ -16,16 +16,16 @@ public class Command
     public Command(Guid id, string path, Args args)
     {
         Id = id;
-        Path = RemoveTrailingSlash(path);
+        Path = RemoveTrailingDot(path);
         Args = args;
     }
     public Command(string path)
     {
         Id = Guid.NewGuid();
-        Path = RemoveTrailingSlash(path);
+        Path = RemoveTrailingDot(path);
         Args = new Args();
     }
-    public static string RemoveTrailingSlash(string path)
+    public static string RemoveTrailingDot(string path)
     {
         if (string.IsNullOrEmpty(path))
             return path;

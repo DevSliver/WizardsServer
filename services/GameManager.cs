@@ -1,14 +1,15 @@
-﻿namespace WizardsServer.GameLogic;
+﻿namespace WizardsServer.services;
 
 using System;
+using WizardsServer.GameLogic.MatchLogic;
 using WizardsServer.ServerLogic;
 
-public class GameManager
+internal class GameManager
 {
     private readonly object _lock = new();
     private readonly Dictionary<Guid, Match> _matches = new();
 
-    public void CreateMatch(Session session1, Session session2)
+    internal void CreateMatch(Session session1, Session session2)
     {
         lock (_lock)
         {
@@ -18,7 +19,7 @@ public class GameManager
             Console.WriteLine($"Матч {id} создан");
         }
     }
-    public bool RemoveMatch(Guid id)
+    internal bool RemoveMatch(Guid id)
     {
         lock (_lock)
         {
